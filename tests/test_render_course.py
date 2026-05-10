@@ -16,6 +16,24 @@ sys.modules["render_course"] = render_course
 spec.loader.exec_module(render_course)
 
 
+class TestParseQuizCaseInsensitive:
+    """Tests for case-insensitive quiz heading parsing (#8)."""
+
+    def test_lowercase_questions_heading(self) -> None:
+        raw = "# Quiz\n\n## questions\n\n1. **Short answer:** What?\n\n## answer key\n\n1. Because.\n"
+        quiz = render_course.parse_quiz(raw, "q")
+        assert quiz is not None
+        assert len(quiz["questions"]) == 1
+        assert quiz["questions"][0]["answer"] == "Because."
+
+    def test_mixed_case_heading(self) -> None:
+        raw = "# Quiz\n\n## QUESTIONS\n\n1. **Short answer:** Hmm?\n\n## ANSWER KEY\n\n1. Yes.\n"
+        quiz = render_course.parse_quiz(raw, "q")
+        assert quiz is not None
+        assert len(quiz["questions"]) == 1
+        assert quiz["questions"][0]["answer"] == "Yes."
+
+
 class TestReadText:
     def test_reads_existing_file(self, tmp_path: Path) -> None:
         f = tmp_path / "hello.md"
