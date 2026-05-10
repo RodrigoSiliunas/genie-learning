@@ -528,12 +528,6 @@ def build_course_data(content_dir: Path, owner_name: str) -> dict[str, Any]:
 
     title_display = parse_first_h1(overview_raw) or owner_name
 
-    repo_url = None
-    if "/" in owner_name:
-        # owner_name is `<owner>-<name>` — best-effort guess. We don't store the URL anywhere
-        # canonical; leave as None and the UI hides the link.
-        pass
-
     return {
         "schema_version": 1,
         "owner_name": owner_name,
