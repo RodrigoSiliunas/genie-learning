@@ -1,512 +1,1483 @@
 <!doctype html>
-<html lang="en" class="h-full">
+<html lang="en" data-theme="light" data-accent="moss" data-density="comfortable">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="generator" content="genie-render" />
-  <title>Genie Learning Course</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            'purple-genie': '#5645d4',
-            'purple-genie-pressed': '#4534b3',
-            'navy-genie': '#0a1530',
-            'navy-genie-deep': '#070f24',
-            charcoal: '#37352f',
-            slate: '#5d5b54',
-            steel: '#787671',
-            stone: '#a4a097',
-            hairline: '#e5e3df',
-            'hairline-strong': '#c8c4be',
-            'surface-genie': '#f6f5f4',
-            'link-blue': '#0075de',
-            tint: {
-              peach: '#ffe8d4',
-              rose: '#fde0ec',
-              mint: '#d9f3e1',
-              lavender: '#e6e0f5',
-              sky: '#dcecfa',
-              yellow: '#fef7d6',
-              'yellow-bold': '#f9e79f',
-              cream: '#f8f5e8',
-            },
-            success: '#1aae39',
-            warning: '#dd5b00',
-            error: '#e03131',
-          },
-          fontFamily: {
-            sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Helvetica', 'sans-serif'],
-            mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Consolas', 'monospace'],
-          },
-          borderRadius: {
-            btn: '8px',
-            card: '12px',
-          },
-          boxShadow: {
-            mockup: 'rgba(15, 15, 15, 0.20) 0px 24px 48px -8px',
-          },
-        },
-      },
-    };
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
-  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
-  <style>
-    html, body { font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Helvetica, sans-serif; }
-    .prose-genie h1 { font-size: 36px; font-weight: 600; line-height: 1.2; letter-spacing: -0.5px; margin-bottom: 16px; color: #1a1a1a; }
-    .prose-genie h2 { font-size: 28px; font-weight: 600; line-height: 1.25; margin-top: 32px; margin-bottom: 12px; color: #1a1a1a; }
-    .prose-genie h3 { font-size: 22px; font-weight: 600; line-height: 1.3; margin-top: 24px; margin-bottom: 10px; color: #1a1a1a; }
-    .prose-genie h4 { font-size: 18px; font-weight: 600; line-height: 1.4; margin-top: 20px; margin-bottom: 8px; color: #37352f; }
-    .prose-genie p { font-size: 16px; line-height: 1.6; margin-bottom: 14px; color: #37352f; }
-    .prose-genie ul, .prose-genie ol { font-size: 16px; line-height: 1.6; padding-left: 24px; margin-bottom: 14px; color: #37352f; }
-    .prose-genie ul { list-style: disc; }
-    .prose-genie ol { list-style: decimal; }
-    .prose-genie li { margin-bottom: 6px; }
-    .prose-genie li > ul, .prose-genie li > ol { margin-top: 4px; margin-bottom: 4px; }
-    .prose-genie a { color: #0075de; text-decoration: underline; text-underline-offset: 2px; }
-    .prose-genie code { background: #f0eeec; color: #37352f; padding: 1px 6px; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 14px; }
-    .prose-genie pre { background: #f0eeec; color: #1a1a1a; padding: 16px; border-radius: 8px; overflow-x: auto; margin-bottom: 16px; }
-    .prose-genie pre code { background: transparent; padding: 0; font-size: 14px; line-height: 1.5; color: #1a1a1a; }
-    .prose-genie strong { font-weight: 600; color: #1a1a1a; }
-    .prose-genie em { font-style: italic; }
-    .prose-genie blockquote { border-left: 3px solid #5645d4; padding-left: 16px; color: #5d5b54; margin: 16px 0; font-style: italic; }
-    .prose-genie table { border-collapse: collapse; margin-bottom: 16px; font-size: 14px; width: 100%; }
-    .prose-genie th, .prose-genie td { border: 1px solid #e5e3df; padding: 8px 12px; text-align: left; vertical-align: top; }
-    .prose-genie th { background: #f6f5f4; font-weight: 600; }
-    .prose-genie hr { border: 0; border-top: 1px solid #e5e3df; margin: 24px 0; }
-    .prose-mini p { margin-bottom: 8px; }
-    .prose-mini p:last-child { margin-bottom: 0; }
-    .flip-card { perspective: 1500px; }
-    .flip-card-inner { transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; position: relative; width: 100%; height: 100%; }
-    .flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
-    .flip-face { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
-    .flip-face-back { transform: rotateY(180deg); }
-    .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    [v-cloak] { display: none; }
-    /* Sticky-note dot motif on hero band */
-    .dot-grid::before {
-      content: ''; position: absolute; inset: 0; opacity: 0.45; pointer-events: none;
-      background-image:
-        radial-gradient(circle at 12% 18%, #ff64c8 0 7px, transparent 8px),
-        radial-gradient(circle at 88% 22%, #f5d75e 0 6px, transparent 7px),
-        radial-gradient(circle at 22% 78%, #1aae39 0 5px, transparent 6px),
-        radial-gradient(circle at 78% 82%, #dd5b00 0 6px, transparent 7px),
-        radial-gradient(circle at 50% 12%, #2a9d99 0 4px, transparent 5px),
-        radial-gradient(circle at 6% 50%, #7b3ff2 0 5px, transparent 6px),
-        radial-gradient(circle at 94% 55%, #ff64c8 0 4px, transparent 5px);
-    }
-  </style>
-</head>
-<body class="h-full text-charcoal antialiased bg-white">
-  <div id="app" v-cloak></div>
-  <script>
-    window.__COURSE_DATA = JSON.parse(atob("/* GENIE_DATA */"));
-  </script>
-  <script>
-    (function () {
-      const data = window.__COURSE_DATA;
-      const mountEl = document.getElementById('app');
-      if (!data) {
-        mountEl.innerHTML = '<div style="padding: 60px; text-align: center; font-family: Inter, sans-serif; color: #787671;">Course data not loaded.</div>';
-        return;
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Genie Learning</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com/3.4.3"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+<script src="https://unpkg.com/vue@3.4.27/dist/vue.global.prod.js"></script>
+
+<script>
+  tailwind.config = {
+    darkMode: ['selector', '[data-theme="dark"]'],
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+          serif: ['"Instrument Serif"', 'ui-serif', 'Georgia', 'serif'],
+          mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'monospace']
+        }
       }
-      document.documentElement.lang = data.language || 'en';
-      document.title = (data.title_display || data.owner_name) + ' — Genie Learning';
+    },
+    corePlugins: { preflight: true }
+  };
+</script>
 
-      const { createApp, ref, computed, reactive, watch } = Vue;
-      marked.setOptions({ gfm: true, breaks: false });
+<style>
+  :root {
+    /* Paper / ink */
+    --paper:        #FAF7EF;
+    --paper-2:      #F4F0E5;
+    --paper-3:      #ECE7D7;
+    --ink:          #1A1714;
+    --ink-soft:     #2A2620;
+    --muted:        #756E60;
+    --muted-soft:   #9A9384;
+    --hairline:     rgba(26, 23, 20, 0.08);
+    --hairline-2:   rgba(26, 23, 20, 0.14);
 
-      const STORAGE_PREFIX = 'genie:' + data.owner_name + ':';
-      const t = (key) => (data.chrome && data.chrome[key]) || key;
-      const md = (raw) => marked.parse(raw || '');
+    /* Accent — moss (default) */
+    --accent:       oklch(0.48 0.10 145);
+    --accent-deep:  oklch(0.38 0.10 145);
+    --accent-soft:  oklch(0.93 0.045 145);
+    --accent-ink:   oklch(0.22 0.06 145);
+    --accent-line:  oklch(0.78 0.08 145);
 
-      const loadProgress = (key, fallback) => {
-        try {
-          const v = localStorage.getItem(STORAGE_PREFIX + key);
-          return v === null ? fallback : JSON.parse(v);
-        } catch (e) { return fallback; }
-      };
-      const saveProgress = (key, value) => {
-        try { localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(value)); } catch (e) { /* ignore */ }
-      };
+    /* Per-module tints (cycling) — share chroma */
+    --tint-0: oklch(0.94 0.035 80);
+    --tint-1: oklch(0.94 0.035 145);
+    --tint-2: oklch(0.94 0.035 35);
+    --tint-3: oklch(0.94 0.035 260);
+    --tint-4: oklch(0.94 0.035 200);
+    --tint-5: oklch(0.94 0.035 320);
 
-      const TINTS = ['peach', 'rose', 'mint', 'lavender', 'sky', 'yellow'];
+    --tint-ink-0: oklch(0.32 0.06 80);
+    --tint-ink-1: oklch(0.32 0.06 145);
+    --tint-ink-2: oklch(0.32 0.06 35);
+    --tint-ink-3: oklch(0.32 0.06 260);
+    --tint-ink-4: oklch(0.32 0.06 200);
+    --tint-ink-5: oklch(0.32 0.06 320);
 
-      const app = createApp({
-        setup() {
-          const view = ref(loadProgress('view', 'overview'));
-          const sidebarOpen = ref(false);
-          const activeModule = ref(-1);
-          const activeQuiz = ref((data.quizzes && data.quizzes[0] && data.quizzes[0].id) || null);
-          const flashcardIdx = ref(0);
-          const flashcardFlipped = ref(false);
-          const flashcardKnown = reactive(loadProgress('flashcards-known', {}));
-          const flashcardFilter = ref('all');
-          const quizState = reactive(loadProgress('quiz-state', {}));
-          const glossarySearch = ref('');
+    /* Quiz semantic */
+    --correct:     oklch(0.55 0.12 150);
+    --correct-bg:  oklch(0.95 0.05 150);
+    --wrong:       oklch(0.52 0.16 25);
+    --wrong-bg:    oklch(0.95 0.04 25);
 
-          watch(view, (v) => saveProgress('view', v));
-          watch(quizState, (v) => saveProgress('quiz-state', JSON.parse(JSON.stringify(v))), { deep: true });
-          watch(flashcardKnown, (v) => saveProgress('flashcards-known', JSON.parse(JSON.stringify(v))), { deep: true });
+    /* Flashcard back */
+    --lavender:     oklch(0.92 0.04 290);
+    --lavender-deep:oklch(0.30 0.08 290);
 
-          const views = [
-            { id: 'overview', label: t('overview') },
-            { id: 'tutorial', label: t('tutorial') },
-            { id: 'modules', label: t('modules') },
-            { id: 'glossary', label: t('glossary') },
-            { id: 'quizzes', label: t('quizzes') },
-            { id: 'flashcards', label: t('flashcards') },
-            { id: 'podcast', label: t('podcast') },
-          ];
+    /* Layout */
+    --sidebar-w: 268px;
+    --max-w: 1180px;
+    --radius: 14px;
+    --radius-sm: 10px;
+    --density-y: 24px;
+  }
 
-          const tintForModule = (idx) => TINTS[idx % TINTS.length];
+  [data-theme="dark"] {
+    --paper:      #131211;
+    --paper-2:    #1A1816;
+    --paper-3:    #221F1B;
+    --ink:        #ECE7DA;
+    --ink-soft:   #DAD3C3;
+    --muted:      #918A7B;
+    --muted-soft: #6B6557;
+    --hairline:   rgba(236, 231, 218, 0.09);
+    --hairline-2: rgba(236, 231, 218, 0.16);
 
-          const currentQuiz = computed(() => (data.quizzes || []).find((q) => q.id === activeQuiz.value) || null);
-          const currentModule = computed(() => (data.modules && activeModule.value >= 0 && data.modules[activeModule.value]) || null);
+    --accent:       oklch(0.78 0.10 145);
+    --accent-deep:  oklch(0.85 0.10 145);
+    --accent-soft:  oklch(0.28 0.045 145);
+    --accent-ink:   oklch(0.92 0.06 145);
+    --accent-line:  oklch(0.50 0.08 145);
 
-          const filteredFlashcards = computed(() => {
-            const all = data.flashcards || [];
-            if (flashcardFilter.value === 'unknown') return all.filter((c, i) => !flashcardKnown[i]);
-            return all;
-          });
-          const currentFlashcard = computed(() => {
-            const fc = filteredFlashcards.value;
-            if (fc.length === 0) return null;
-            return fc[flashcardIdx.value % fc.length];
-          });
-          const knownCount = computed(() => Object.values(flashcardKnown).filter((v) => v).length);
+    --tint-0: oklch(0.26 0.035 80);
+    --tint-1: oklch(0.26 0.035 145);
+    --tint-2: oklch(0.26 0.035 35);
+    --tint-3: oklch(0.26 0.035 260);
+    --tint-4: oklch(0.26 0.035 200);
+    --tint-5: oklch(0.26 0.035 320);
 
-          const filteredGlossary = computed(() => {
-            const q = glossarySearch.value.trim().toLowerCase();
-            const all = data.glossary || [];
-            if (!q) return all;
-            return all
-              .map((letter) => ({
-                letter: letter.letter,
-                terms: letter.terms.filter(
-                  (term) => term.term.toLowerCase().includes(q) || term.definition.toLowerCase().includes(q)
-                ),
-              }))
-              .filter((letter) => letter.terms.length > 0);
-          });
+    --tint-ink-0: oklch(0.88 0.06 80);
+    --tint-ink-1: oklch(0.88 0.06 145);
+    --tint-ink-2: oklch(0.88 0.06 35);
+    --tint-ink-3: oklch(0.88 0.06 260);
+    --tint-ink-4: oklch(0.88 0.06 200);
+    --tint-ink-5: oklch(0.88 0.06 320);
 
-          const handleQuizSelect = (qIdx, optKey) => {
-            const id = activeQuiz.value;
-            if (!quizState[id]) quizState[id] = {};
-            if (!quizState[id][qIdx]) quizState[id][qIdx] = {};
-            quizState[id][qIdx].selected = optKey;
-            quizState[id][qIdx].revealed = true;
-          };
-          const handleQuizReveal = (qIdx) => {
-            const id = activeQuiz.value;
-            if (!quizState[id]) quizState[id] = {};
-            if (!quizState[id][qIdx]) quizState[id][qIdx] = {};
-            quizState[id][qIdx].revealed = true;
-          };
-          const handleQuizText = (qIdx, evt) => {
-            const id = activeQuiz.value;
-            if (!quizState[id]) quizState[id] = {};
-            if (!quizState[id][qIdx]) quizState[id][qIdx] = {};
-            quizState[id][qIdx].userText = evt.target.value;
-          };
-          const isAnswered = (qIdx) => !!(quizState[activeQuiz.value] && quizState[activeQuiz.value][qIdx] && quizState[activeQuiz.value][qIdx].revealed);
-          const selectedOption = (qIdx) => quizState[activeQuiz.value] && quizState[activeQuiz.value][qIdx] && quizState[activeQuiz.value][qIdx].selected;
-          const userText = (qIdx) => (quizState[activeQuiz.value] && quizState[activeQuiz.value][qIdx] && quizState[activeQuiz.value][qIdx].userText) || '';
-          const quizProgress = (quizId) => {
-            const total = ((data.quizzes || []).find((q) => q.id === quizId) || {}).questions?.length || 0;
-            const answered = Object.values(quizState[quizId] || {}).filter((s) => s && s.revealed).length;
-            return { answered, total };
-          };
+    --correct:    oklch(0.78 0.12 150);
+    --correct-bg: oklch(0.28 0.06 150);
+    --wrong:      oklch(0.78 0.14 25);
+    --wrong-bg:   oklch(0.28 0.06 25);
 
-          const flashcardNext = () => {
-            const fc = filteredFlashcards.value;
-            if (fc.length === 0) return;
-            flashcardFlipped.value = false;
-            flashcardIdx.value = (flashcardIdx.value + 1) % fc.length;
-          };
-          const flashcardPrev = () => {
-            const fc = filteredFlashcards.value;
-            if (fc.length === 0) return;
-            flashcardFlipped.value = false;
-            flashcardIdx.value = (flashcardIdx.value - 1 + fc.length) % fc.length;
-          };
-          const markFlashcard = (status) => {
-            const card = currentFlashcard.value;
-            if (!card) return;
-            const allIdx = (data.flashcards || []).indexOf(card);
-            if (allIdx >= 0) flashcardKnown[allIdx] = status === 'known';
-            flashcardNext();
-          };
+    --lavender:      oklch(0.28 0.05 290);
+    --lavender-deep: oklch(0.92 0.06 290);
+  }
 
-          return {
-            data, t, md, views, view, sidebarOpen,
-            activeModule, currentModule, tintForModule,
-            activeQuiz, currentQuiz,
-            quizState, handleQuizSelect, handleQuizReveal, handleQuizText, isAnswered, selectedOption, userText, quizProgress,
-            flashcardIdx, flashcardFlipped, flashcardKnown, flashcardFilter,
-            filteredFlashcards, currentFlashcard, flashcardNext, flashcardPrev, markFlashcard, knownCount,
-            glossarySearch, filteredGlossary,
-          };
-        },
-        template: `
-<div class="min-h-screen flex flex-col">
-  <header class="sticky top-0 z-30 bg-white border-b border-hairline h-16 flex items-center px-4 md:px-6">
-    <button @click="sidebarOpen = !sidebarOpen" class="md:hidden mr-2 p-2 -ml-2 rounded-btn hover:bg-surface-genie" :aria-label="t('menu')">
-      <svg class="w-5 h-5 text-charcoal" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-    </button>
-    <div class="flex items-center gap-3 min-w-0">
-      <div class="w-8 h-8 bg-purple-genie rounded-btn flex items-center justify-center shrink-0">
-        <span class="text-white font-bold text-sm">G</span>
+  [data-accent="terracotta"] {
+    --accent:       oklch(0.58 0.13 35);
+    --accent-deep:  oklch(0.48 0.13 35);
+    --accent-soft:  oklch(0.93 0.045 35);
+    --accent-ink:   oklch(0.28 0.08 35);
+    --accent-line:  oklch(0.78 0.09 35);
+  }
+  [data-theme="dark"][data-accent="terracotta"] {
+    --accent:       oklch(0.78 0.12 35);
+    --accent-deep:  oklch(0.85 0.12 35);
+    --accent-soft:  oklch(0.30 0.06 35);
+    --accent-ink:   oklch(0.92 0.06 35);
+    --accent-line:  oklch(0.50 0.09 35);
+  }
+  [data-accent="indigo"] {
+    --accent:       oklch(0.50 0.13 265);
+    --accent-deep:  oklch(0.40 0.13 265);
+    --accent-soft:  oklch(0.93 0.045 265);
+    --accent-ink:   oklch(0.26 0.08 265);
+    --accent-line:  oklch(0.76 0.09 265);
+  }
+  [data-theme="dark"][data-accent="indigo"] {
+    --accent:       oklch(0.78 0.12 265);
+    --accent-deep:  oklch(0.85 0.12 265);
+    --accent-soft:  oklch(0.30 0.06 265);
+    --accent-ink:   oklch(0.92 0.06 265);
+    --accent-line:  oklch(0.50 0.09 265);
+  }
+
+  [data-density="compact"] {
+    --density-y: 14px;
+  }
+
+  /* Reset/base */
+  html { background: var(--paper); color: var(--ink); }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: 'cv11', 'ss01';
+    min-height: 100vh;
+  }
+  [v-cloak] { display: none !important; }
+
+  /* Paper grain (very subtle, additive) */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.045 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    opacity: 0.5;
+    mix-blend-mode: multiply;
+    z-index: 0;
+  }
+  [data-theme="dark"] body::before { mix-blend-mode: screen; opacity: 0.4; }
+
+  /* Selection */
+  ::selection { background: var(--accent-soft); color: var(--accent-ink); }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--hairline-2); border-radius: 999px; border: 2px solid transparent; background-clip: padding-box; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted-soft); background-clip: padding-box; border: 2px solid transparent;}
+
+  /* Focus */
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+
+  /* Hairline */
+  .hairline { border-color: var(--hairline); }
+  .hairline-2 { border-color: var(--hairline-2); }
+
+  /* Smooth transitions for theme */
+  html, body, .surface { transition: background-color .25s ease, color .25s ease, border-color .25s ease; }
+
+  /* === Typography === */
+  .display-serif {
+    font-family: 'Instrument Serif', ui-serif, Georgia, serif;
+    font-weight: 400;
+    letter-spacing: -0.012em;
+    line-height: 0.98;
+  }
+  .display-serif em, .display-serif i { font-style: italic; }
+  .eyebrow {
+    font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 600;
+    color: var(--muted);
+  }
+  .smallcaps {
+    font-variant: all-small-caps; letter-spacing: 0.06em; font-weight: 600;
+  }
+
+  /* === Long-form prose === */
+  .prose-genie { color: var(--ink-soft); font-size: 16.5px; line-height: 1.72; }
+  .prose-genie > * + * { margin-top: 1.05em; }
+  .prose-genie h1, .prose-genie h2, .prose-genie h3, .prose-genie h4 {
+    color: var(--ink); font-weight: 600; line-height: 1.18;
+    margin-top: 2em; margin-bottom: 0.45em;
+  }
+  .prose-genie h1 { font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 2.1rem; letter-spacing: -0.01em; }
+  .prose-genie h2 { font-size: 1.4rem; }
+  .prose-genie h3 { font-size: 1.1rem; }
+  .prose-genie h4 { font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+  .prose-genie p { margin-top: 0.9em; }
+  .prose-genie a { color: var(--accent); text-decoration: underline; text-decoration-color: var(--accent-line); text-underline-offset: 3px; }
+  .prose-genie a:hover { text-decoration-color: var(--accent); }
+  .prose-genie strong { color: var(--ink); font-weight: 600; }
+  .prose-genie em { font-style: italic; }
+  .prose-genie ul, .prose-genie ol { padding-left: 1.4em; }
+  .prose-genie li { margin-top: 0.35em; }
+  .prose-genie ul li::marker { color: var(--accent); }
+  .prose-genie ol li::marker { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .prose-genie blockquote {
+    border-left: 2px solid var(--accent);
+    padding: 0.2em 0 0.2em 1.1em;
+    color: var(--muted);
+    font-style: italic;
+  }
+  .prose-genie hr { border: 0; border-top: 1px solid var(--hairline); margin: 2em 0; }
+  .prose-genie code:not(pre code) {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 0.86em;
+    background: var(--paper-2);
+    border: 1px solid var(--hairline);
+    padding: 1px 6px; border-radius: 5px;
+    color: var(--accent-ink);
+  }
+  .prose-genie pre {
+    background: var(--paper-2);
+    border: 1px solid var(--hairline);
+    border-radius: 12px;
+    padding: 18px 20px;
+    overflow-x: auto;
+    line-height: 1.6;
+  }
+  .prose-genie pre code {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 13px;
+    color: var(--ink);
+  }
+  .prose-genie table { border-collapse: collapse; width: 100%; }
+  .prose-genie th, .prose-genie td { border-bottom: 1px solid var(--hairline); padding: 8px 10px; text-align: left; }
+  .prose-genie th { color: var(--muted); font-weight: 600; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.05em; }
+
+  /* Compact prose used in glossary */
+  .prose-mini { color: var(--ink-soft); font-size: 14.5px; line-height: 1.6; }
+  .prose-mini code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.88em;
+    background: var(--paper-2);
+    padding: 0 4px; border-radius: 4px;
+  }
+  .prose-mini em { font-style: italic; color: var(--muted); }
+  .prose-mini strong { color: var(--ink); }
+
+  /* === Buttons === */
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 11px 18px;
+    border-radius: 10px;
+    font-weight: 500;
+    font-size: 14.5px;
+    transition: transform .15s ease, background-color .2s ease, color .2s ease, border-color .2s ease;
+    min-height: 44px;
+    line-height: 1;
+    border: 1px solid transparent;
+    cursor: pointer;
+    user-select: none;
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn-primary {
+    background: var(--ink);
+    color: var(--paper);
+  }
+  [data-theme="dark"] .btn-primary { background: var(--paper); color: var(--ink); }
+  .btn-primary:hover { background: var(--accent-deep); color: white; }
+  [data-theme="dark"] .btn-primary:hover { background: var(--accent); color: var(--accent-ink); }
+  .btn-ghost {
+    background: transparent; color: var(--ink);
+    border-color: var(--hairline-2);
+  }
+  .btn-ghost:hover { background: var(--paper-2); border-color: var(--ink); }
+  .btn-accent {
+    background: var(--accent); color: white;
+  }
+  [data-theme="dark"] .btn-accent { color: var(--accent-ink); }
+  .btn-accent:hover { background: var(--accent-deep); }
+
+  /* === Chips & badges === */
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11px; font-weight: 600;
+    padding: 4px 9px;
+    border-radius: 999px;
+    background: var(--paper-2);
+    color: var(--muted);
+    border: 1px solid var(--hairline);
+    letter-spacing: 0.03em;
+  }
+  .badge-accent {
+    background: var(--accent-soft);
+    color: var(--accent-ink);
+    border-color: transparent;
+  }
+  .badge-dot { width: 6px; height: 6px; border-radius: 999px; background: var(--accent); }
+  .kbd {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 5px;
+    background: var(--paper-2);
+    border: 1px solid var(--hairline);
+    color: var(--muted);
+    line-height: 1;
+  }
+
+  /* === Cards === */
+  .card {
+    background: var(--paper);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius);
+    transition: transform .25s cubic-bezier(.2,.7,.2,1), box-shadow .25s ease, border-color .2s ease;
+  }
+  .card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 32px -16px rgba(26,23,20,0.18), 0 2px 6px -2px rgba(26,23,20,0.06);
+    border-color: var(--hairline-2);
+  }
+  [data-theme="dark"] .card-hover:hover {
+    box-shadow: 0 14px 32px -16px rgba(0,0,0,0.5), 0 2px 6px -2px rgba(0,0,0,0.3);
+  }
+
+  /* Module card numbered */
+  .module-num {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 44px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+
+  /* === Sidebar === */
+  .nav-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: background-color .15s ease, color .15s ease;
+    user-select: none;
+  }
+  .nav-item:hover { background: var(--paper-2); color: var(--ink); }
+  .nav-item.is-active {
+    background: var(--paper-2);
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .nav-item.is-active .nav-mark { background: var(--accent); }
+  .nav-mark {
+    width: 4px; height: 16px; border-radius: 2px;
+    background: var(--hairline-2);
+    flex: 0 0 4px;
+  }
+  .nav-item .nav-count {
+    margin-left: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted-soft);
+    font-weight: 400;
+  }
+
+  /* === Hero === */
+  .hero {
+    position: relative;
+    border: 1px solid var(--hairline);
+    border-radius: 22px;
+    overflow: hidden;
+    background: var(--paper);
+  }
+  .hero-ornament {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(60% 80% at 100% 0%, color-mix(in oklab, var(--accent-soft) 70%, transparent) 0%, transparent 60%),
+      linear-gradient(180deg, var(--paper) 0%, var(--paper-2) 100%);
+  }
+  .hero-ruler {
+    position: absolute; left: 0; right: 0; top: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--hairline-2) 30%, var(--hairline-2) 70%, transparent);
+  }
+  .hero-stitch {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    height: 14px;
+    background-image: linear-gradient(90deg, var(--hairline-2) 50%, transparent 50%);
+    background-size: 10px 1px;
+    background-position: 0 bottom;
+    background-repeat: repeat-x;
+  }
+
+  /* === Flashcard 3D === */
+  .flip-scene { perspective: 1400px; }
+  .flip-card {
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.55s cubic-bezier(.2,.7,.2,1);
+    width: 100%;
+    aspect-ratio: 16/10;
+    max-height: 480px;
+  }
+  .flip-card.is-flipped { transform: rotateY(180deg); }
+  .flip-face {
+    position: absolute; inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: 20px;
+    padding: 36px 38px;
+    display: flex; flex-direction: column;
+    cursor: pointer;
+    border: 1px solid var(--hairline);
+  }
+  .flip-front { background: var(--paper); }
+  .flip-back {
+    background: var(--lavender);
+    color: var(--lavender-deep);
+    transform: rotateY(180deg);
+  }
+  .flip-back .prose-genie { color: var(--lavender-deep); }
+  .flip-back .prose-genie strong, .flip-back .prose-genie h1, .flip-back .prose-genie h2, .flip-back .prose-genie h3 { color: var(--lavender-deep); }
+
+  /* === Quiz option === */
+  .quiz-opt {
+    display: flex; align-items: flex-start; gap: 14px;
+    padding: 14px 16px;
+    border: 1px solid var(--hairline);
+    border-radius: 12px;
+    cursor: pointer;
+    text-align: left;
+    background: var(--paper);
+    transition: background-color .2s, border-color .2s, transform .15s;
+    width: 100%;
+  }
+  .quiz-opt:hover { border-color: var(--ink); background: var(--paper-2); }
+  .quiz-opt .opt-key {
+    flex: 0 0 28px;
+    width: 28px; height: 28px;
+    border-radius: 7px;
+    border: 1px solid var(--hairline-2);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .quiz-opt.selected { border-color: var(--ink); background: var(--paper-2); }
+  .quiz-opt.selected .opt-key { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .quiz-opt.is-correct { border-color: var(--correct); background: var(--correct-bg); }
+  .quiz-opt.is-correct .opt-key { background: var(--correct); color: white; border-color: var(--correct); }
+  .quiz-opt.is-wrong { border-color: var(--wrong); background: var(--wrong-bg); }
+  .quiz-opt.is-wrong .opt-key { background: var(--wrong); color: white; border-color: var(--wrong); }
+
+  /* === Tweaks panel === */
+  .tweaks-launch {
+    position: fixed; bottom: 18px; right: 18px;
+    z-index: 60;
+    background: var(--ink); color: var(--paper);
+    border-radius: 999px;
+    width: 44px; height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 8px 22px -10px rgba(0,0,0,0.4);
+    cursor: pointer;
+    border: 1px solid var(--hairline-2);
+    transition: transform .15s ease;
+  }
+  .tweaks-launch:hover { transform: scale(1.04); }
+  [data-theme="dark"] .tweaks-launch { background: var(--paper); color: var(--ink); }
+
+  .tweaks-panel {
+    position: fixed; bottom: 76px; right: 18px;
+    z-index: 60;
+    width: 280px;
+    background: var(--paper);
+    border: 1px solid var(--hairline-2);
+    border-radius: 16px;
+    box-shadow: 0 24px 60px -20px rgba(0,0,0,0.25);
+    padding: 14px;
+    transform-origin: bottom right;
+  }
+  .tweaks-panel.is-hidden { display: none; }
+  .seg {
+    display: grid; grid-auto-flow: column; grid-auto-columns: 1fr;
+    padding: 3px;
+    background: var(--paper-2);
+    border-radius: 9px;
+    border: 1px solid var(--hairline);
+  }
+  .seg button {
+    padding: 6px 8px;
+    border-radius: 7px;
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 500;
+    transition: background-color .15s, color .15s;
+  }
+  .seg button.is-active { background: var(--paper); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,0.06); }
+  .seg button:hover { color: var(--ink); }
+
+  /* Swatch group */
+  .swatch-row { display: flex; gap: 8px; }
+  .swatch {
+    width: 28px; height: 28px;
+    border-radius: 999px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: transform .15s ease, border-color .15s;
+    position: relative;
+  }
+  .swatch.is-active { border-color: var(--ink); }
+  .swatch::after {
+    content: ''; position: absolute; inset: 3px; border-radius: 999px;
+  }
+  .swatch[data-color="moss"]::after       { background: oklch(0.55 0.12 145); }
+  .swatch[data-color="terracotta"]::after { background: oklch(0.62 0.13 35); }
+  .swatch[data-color="indigo"]::after     { background: oklch(0.55 0.13 265); }
+
+  /* Letter section in glossary */
+  .glossary-letter {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 96px;
+    line-height: 1;
+    color: var(--accent);
+    letter-spacing: -0.04em;
+  }
+
+  /* Animations */
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  .view-enter { animation: fadeUp .35s cubic-bezier(.2,.7,.2,1); }
+
+  /* Reveal animation for short answer */
+  @keyframes revealIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+  .reveal-in { animation: revealIn .35s ease; }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.001s !important; transition-duration: 0.001s !important; }
+    .flip-card { transition: none !important; }
+  }
+
+  /* Mobile drawer */
+  .drawer-backdrop {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+    z-index: 70;
+  }
+  .drawer-panel {
+    position: fixed; top: 0; left: 0; bottom: 0; width: 280px;
+    background: var(--paper); border-right: 1px solid var(--hairline-2);
+    padding: 16px; z-index: 71;
+    transform: translateX(0); transition: transform .25s ease;
+    overflow-y: auto;
+  }
+
+  /* Density spacing */
+  .stack { display: flex; flex-direction: column; gap: var(--density-y); }
+
+  /* Audio */
+  audio { width: 100%; }
+  audio::-webkit-media-controls-panel { background: var(--paper-2); }
+
+  /* Icon stroke */
+  .icon { stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+
+  /* Page width helper */
+  .container-page { max-width: var(--max-w); margin: 0 auto; padding-left: clamp(20px, 4vw, 48px); padding-right: clamp(20px, 4vw, 48px); }
+
+  /* Hide on mobile / desktop helpers */
+  @media (max-width: 1023px) {
+    .sidebar-desktop { display: none; }
+  }
+  @media (min-width: 1024px) {
+    .sidebar-mobile-trigger { display: none; }
+  }
+
+  /* Smooth view container */
+  main { position: relative; z-index: 1; }
+</style>
+</head>
+<body>
+<div id="app" v-cloak>
+
+  <!-- Header -->
+  <header class="sticky top-0 z-40" :style="{background: 'color-mix(in oklab, var(--paper) 92%, transparent)', backdropFilter: 'blur(8px)'}">
+    <div class="border-b hairline">
+      <div class="container-page flex items-center gap-3 h-[60px]">
+        <button class="sidebar-mobile-trigger -ml-2 p-2 rounded-md hover:bg-[var(--paper-2)]" @click="drawerOpen = true" :aria-label="t('menu')">
+          <svg class="icon" width="20" height="20" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </button>
+
+        <a href="#" @click.prevent="goto('overview')" class="flex items-center gap-2.5 group">
+          <span class="inline-flex items-center justify-center w-7 h-7 rounded-[8px] border hairline-2" :style="{background: 'var(--paper-2)'}">
+            <svg width="14" height="14" viewBox="0 0 24 24" class="icon" :style="{stroke: 'var(--accent)'}">
+              <path d="M12 3l2.6 5.6 6 .9-4.4 4.4 1.1 6.1L12 17.8 6.7 20l1.1-6.1L3.4 9.5l6-.9L12 3z"/>
+            </svg>
+          </span>
+          <span class="font-medium text-[15px] group-hover:opacity-80 truncate max-w-[280px] sm:max-w-none" :title="data.title_display">{{ data.title_display }}</span>
+          <span class="badge ml-1.5 hidden sm:inline-flex">{{ data.language }}</span>
+        </a>
+
+        <div class="ml-auto flex items-center gap-2">
+          <a v-if="data.repo_url" :href="data.repo_url" target="_blank" rel="noopener"
+             class="hidden sm:inline-flex items-center gap-1.5 text-[13px] text-[var(--muted)] hover:text-[var(--ink)] px-2 py-1 rounded-md hover:bg-[var(--paper-2)]">
+            <svg class="icon" width="14" height="14" viewBox="0 0 24 24"><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 00-1.3-3.2 4.2 4.2 0 00-.1-3.2s-1.1-.3-3.5 1.3a12 12 0 00-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 00-.1 3.2A4.6 4.6 0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg>
+            <span class="font-mono">{{ shortRepo }}</span>
+          </a>
+        </div>
       </div>
-      <div class="min-w-0">
-        <h1 class="text-base font-semibold text-charcoal leading-tight truncate">{{ data.title_display }}</h1>
-        <p class="text-xs text-stone leading-tight">Genie Learning · {{ data.language }}</p>
-      </div>
-    </div>
-    <div class="ml-auto hidden sm:flex items-center gap-2">
-      <a v-if="data.repo_url" :href="data.repo_url" target="_blank" rel="noopener"
-         class="text-xs text-steel hover:text-charcoal underline decoration-hairline-strong underline-offset-2">{{ t('source_repo') }} ↗</a>
     </div>
   </header>
 
-  <div class="flex flex-1 min-h-0">
-    <aside :class="[
-        'bg-white border-r border-hairline w-[260px] shrink-0 sticky top-16 self-start h-[calc(100vh-4rem)] overflow-y-auto',
-        sidebarOpen ? 'fixed inset-0 top-16 z-20 block' : 'hidden md:block'
-      ]">
-      <nav class="p-3 space-y-1">
-        <button v-for="v in views" :key="v.id" @click="view = v.id; sidebarOpen = false"
-          class="w-full text-left px-3 py-2 rounded-btn text-sm font-medium transition"
-          :class="view === v.id ? 'bg-[#1a1a1a] text-white' : 'text-charcoal hover:bg-surface-genie'">
-          {{ v.label }}
-        </button>
-      </nav>
-      <div class="px-4 mt-4 text-[11px] text-stone leading-relaxed">
-        <p>{{ t('progress_hint') }}</p>
+  <!-- Mobile drawer -->
+  <transition>
+    <div v-if="drawerOpen">
+      <div class="drawer-backdrop" @click="drawerOpen = false"></div>
+      <aside class="drawer-panel">
+        <div class="flex items-center justify-between mb-4">
+          <span class="eyebrow">{{ t('menu') }}</span>
+          <button class="p-2 rounded-md hover:bg-[var(--paper-2)]" @click="drawerOpen = false">
+            <svg class="icon" width="18" height="18" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+          </button>
+        </div>
+        <nav class="space-y-1">
+          <div v-for="item in navItems" :key="item.id"
+               class="nav-item" :class="{'is-active': view === item.id}"
+               @click="goto(item.id); drawerOpen = false">
+            <span class="nav-mark"></span>
+            <span class="flex-1">{{ item.label }}</span>
+            <span v-if="item.count != null" class="nav-count">{{ item.count }}</span>
+          </div>
+        </nav>
+        <div class="mt-6 pt-4 border-t hairline text-[11.5px] text-[var(--muted)] leading-relaxed">
+          {{ t('progress_hint') }}
+        </div>
+      </aside>
+    </div>
+  </transition>
+
+  <!-- Main shell -->
+  <div class="container-page py-8 lg:py-12 grid grid-cols-1 lg:grid-cols-[var(--sidebar-w)_1fr] gap-10 lg:gap-12">
+
+    <!-- Sidebar -->
+    <aside class="sidebar-desktop">
+      <div class="sticky top-[80px]">
+        <div class="eyebrow mb-3 px-3">{{ data.chrome.menu || 'Course' }}</div>
+        <nav class="space-y-0.5">
+          <div v-for="item in navItems" :key="item.id"
+               class="nav-item" :class="{'is-active': view === item.id}"
+               @click="goto(item.id)" :tabindex="0" @keydown.enter="goto(item.id)" role="button">
+            <span class="nav-mark"></span>
+            <span class="flex-1">{{ item.label }}</span>
+            <span v-if="item.count != null" class="nav-count">{{ item.count }}</span>
+          </div>
+        </nav>
+        <div class="mt-6 px-3 py-3 border-t hairline">
+          <div class="text-[11px] leading-snug text-[var(--muted)]">
+            <svg class="icon inline-block -mt-0.5 mr-1" width="11" height="11" viewBox="0 0 24 24"><circle cx="12" cy="16" r="1"/><path d="M12 12V8M5 12V8a7 7 0 1114 0v4"/></svg>
+            {{ t('progress_hint') }}
+          </div>
+        </div>
       </div>
     </aside>
 
-    <div v-if="sidebarOpen" @click="sidebarOpen = false" class="md:hidden fixed inset-0 top-16 bg-black/40 z-10"></div>
+    <!-- Main content -->
+    <main class="min-w-0">
 
-    <main class="flex-1 min-w-0 bg-white">
-      <!-- OVERVIEW -->
-      <section v-if="view === 'overview'">
-        <div class="bg-navy-genie text-white relative overflow-hidden">
-          <div class="dot-grid"></div>
-          <div class="relative max-w-[820px] mx-auto px-6 md:px-12 py-16 md:py-24 text-center">
-            <div class="inline-flex items-center gap-2 mb-5 px-3 py-1 rounded-full bg-white/10 text-xs font-semibold uppercase tracking-wider">{{ t('hero_eyebrow') }}</div>
-            <h1 class="text-4xl md:text-6xl font-semibold leading-[1.05] tracking-tight mb-4">{{ data.title_display }}</h1>
-            <p class="text-base md:text-lg text-white/80 max-w-[640px] mx-auto leading-relaxed">{{ t('hero_subtitle') }}</p>
-            <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
-              <button @click="view = 'tutorial'" class="bg-purple-genie text-white px-5 py-2.5 rounded-btn font-medium text-sm hover:bg-purple-genie-pressed transition">{{ t('start_tutorial') }}</button>
-              <button @click="view = 'flashcards'" class="bg-white/0 border border-white/30 text-white px-5 py-2.5 rounded-btn font-medium text-sm hover:bg-white/10 transition">{{ t('flashcards') }}</button>
+      <!-- ========= OVERVIEW ========= -->
+      <section v-if="view === 'overview'" :key="'v-overview'" class="view-enter">
+        <div class="hero p-7 sm:p-10 lg:p-14">
+          <div class="hero-ornament"></div>
+          <div class="hero-ruler"></div>
+          <div class="hero-stitch"></div>
+          <div class="relative">
+            <div class="flex items-center gap-2 mb-6">
+              <span class="eyebrow">{{ t('hero_eyebrow') }}</span>
+              <span class="w-6 h-px" :style="{background: 'var(--hairline-2)'}"></span>
+              <span class="badge"><span class="badge-dot"></span>{{ data.language }}</span>
+            </div>
+            <h1 class="display-serif text-[44px] sm:text-[64px] lg:text-[80px] max-w-[12ch] mb-6">
+              {{ titleDisplay }}<em class="text-[var(--accent)]">.</em>
+            </h1>
+            <p class="max-w-[55ch] text-[16.5px] leading-relaxed text-[var(--muted)] mb-8">
+              {{ t('hero_subtitle') }}
+            </p>
+            <div class="flex flex-wrap gap-3">
+              <button class="btn btn-primary" @click="goto('tutorial')">
+                <svg class="icon" width="14" height="14" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                {{ t('start_tutorial') }}
+              </button>
+              <button class="btn btn-ghost" @click="goto('flashcards')">
+                <svg class="icon" width="14" height="14" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg>
+                {{ t('flashcards') }}
+              </button>
+            </div>
+
+            <!-- meta strip -->
+            <div class="mt-12 pt-6 border-t hairline grid grid-cols-2 sm:grid-cols-4 gap-y-4 gap-x-6 max-w-[640px]">
+              <div>
+                <div class="eyebrow mb-1">{{ t('modules') }}</div>
+                <div class="font-serif text-[28px]">{{ data.modules.length.toString().padStart(2,'0') }}</div>
+              </div>
+              <div>
+                <div class="eyebrow mb-1">{{ t('glossary') }}</div>
+                <div class="font-serif text-[28px]">{{ glossaryCount.toString().padStart(2,'0') }}</div>
+              </div>
+              <div>
+                <div class="eyebrow mb-1">{{ t('quizzes') }}</div>
+                <div class="font-serif text-[28px]">{{ data.quizzes.length.toString().padStart(2,'0') }}</div>
+              </div>
+              <div>
+                <div class="eyebrow mb-1">{{ t('flashcards') }}</div>
+                <div class="font-serif text-[28px]">{{ data.flashcards.length.toString().padStart(2,'0') }}</div>
+              </div>
             </div>
           </div>
         </div>
-        <div class="px-6 md:px-12 py-12 max-w-[820px] mx-auto">
-          <div class="prose-genie" v-html="md(data.overview.raw)"></div>
+
+        <!-- overview body -->
+        <article class="mt-12 prose-genie max-w-[68ch]" v-html="renderMd(data.overview && data.overview.raw)"></article>
+      </section>
+
+      <!-- ========= TUTORIAL ========= -->
+      <section v-else-if="view === 'tutorial'" :key="'v-tutorial'" class="view-enter">
+        <header class="mb-10">
+          <div class="eyebrow mb-3">{{ t('tutorial') }}</div>
+          <h2 class="display-serif text-[40px] sm:text-[56px] leading-none">{{ t('tutorial') }}<em class="text-[var(--accent)]">.</em></h2>
+        </header>
+        <article v-if="data.tutorial" class="prose-genie max-w-[68ch]" v-html="renderMd(data.tutorial.raw)"></article>
+        <div v-else class="rounded-2xl border hairline p-10 text-center text-[var(--muted)]">
+          <svg class="icon mx-auto mb-3" width="28" height="28" viewBox="0 0 24 24"><path d="M12 8v5M12 17v.01"/><circle cx="12" cy="12" r="9"/></svg>
+          {{ t('not_available') }}
         </div>
       </section>
 
-      <!-- TUTORIAL -->
-      <section v-else-if="view === 'tutorial'" class="px-6 md:px-12 py-12 max-w-[820px] mx-auto">
-        <div v-if="data.tutorial" class="prose-genie" v-html="md(data.tutorial.raw)"></div>
-        <div v-else class="text-stone">{{ t('not_available') }}</div>
-      </section>
+      <!-- ========= MODULES ========= -->
+      <section v-else-if="view === 'modules'" :key="'v-modules'" class="view-enter">
+        <template v-if="!activeModule">
+          <header class="mb-10 flex items-end justify-between gap-6 flex-wrap">
+            <div>
+              <div class="eyebrow mb-3">{{ t('modules') }}</div>
+              <h2 class="display-serif text-[40px] sm:text-[56px] leading-none">{{ data.modules.length }} <em>lessons</em></h2>
+              <p class="mt-3 text-[15px] text-[var(--muted)] max-w-[50ch]">{{ t('modules_subtitle') }}</p>
+            </div>
+          </header>
+          <div v-if="data.modules.length" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+            <article v-for="(m, idx) in data.modules" :key="m.slug"
+                     class="card card-hover p-6 cursor-pointer flex flex-col gap-5 group"
+                     :style="moduleTintStyle(idx)"
+                     @click="openModule(m)" tabindex="0" @keydown.enter="openModule(m)">
+              <div class="flex items-start justify-between">
+                <div class="module-num" :style="{color: 'var(--tint-ink, var(--ink))'}">{{ String(idx+1).padStart(2,'0') }}</div>
+                <span class="eyebrow opacity-70">{{ t('modules') }}</span>
+              </div>
+              <div>
+                <h3 class="font-serif text-[26px] leading-[1.1] mb-2" style="color: var(--tint-ink, var(--ink));">{{ m.title_display }}</h3>
+                <p class="text-[14px] text-[var(--muted)] leading-relaxed line-clamp-2" style="color: color-mix(in oklab, var(--tint-ink, var(--ink)) 65%, transparent);">{{ m.purpose }}</p>
+              </div>
+              <div class="mt-auto pt-4 border-t" style="border-color: color-mix(in oklab, var(--tint-ink, var(--ink)) 12%, transparent);">
+                <div class="flex items-center justify-between text-[12.5px]">
+                  <span class="smallcaps" style="color: color-mix(in oklab, var(--tint-ink, var(--ink)) 70%, transparent);">{{ m.name }}</span>
+                  <svg class="icon transition-transform group-hover:translate-x-0.5" width="16" height="16" viewBox="0 0 24 24" :style="{stroke: 'var(--tint-ink, var(--ink))'}"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                </div>
+              </div>
+            </article>
+          </div>
+          <div v-else class="rounded-2xl border hairline p-10 text-center text-[var(--muted)]">{{ t('not_available') }}</div>
+        </template>
 
-      <!-- MODULES -->
-      <section v-else-if="view === 'modules'" class="px-6 md:px-12 py-12 max-w-[1100px] mx-auto">
-        <div v-if="!currentModule">
-          <h2 class="text-3xl font-semibold text-charcoal mb-2">{{ t('modules') }}</h2>
-          <p class="text-sm text-stone mb-8">{{ t('modules_subtitle') }}</p>
-          <div v-if="data.modules && data.modules.length" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <button v-for="(mod, idx) in data.modules" :key="mod.slug"
-              @click="activeModule = idx"
-              class="text-left p-6 rounded-card border border-hairline transition hover:shadow-mockup hover:-translate-y-0.5"
-              :class="'bg-tint-' + tintForModule(idx)">
-              <div class="text-xs font-semibold uppercase tracking-wider text-charcoal/60 mb-2">{{ String(idx + 1).padStart(2, '0') }}</div>
-              <h3 class="text-xl font-semibold text-charcoal mb-1">{{ mod.title_display || mod.name }}</h3>
-              <p class="text-sm text-charcoal/80 line-clamp-2">{{ mod.purpose || '' }}</p>
+        <template v-else>
+          <button @click="activeModule = null" class="inline-flex items-center gap-2 text-[13px] text-[var(--muted)] hover:text-[var(--ink)] mb-6">
+            <svg class="icon" width="14" height="14" viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+            {{ t('back_to_modules') }}
+          </button>
+          <div class="eyebrow mb-2">{{ t('modules') }} · {{ String(activeModuleIndex+1).padStart(2,'0') }}</div>
+          <h2 class="display-serif text-[40px] sm:text-[52px] leading-[1.02] mb-4 max-w-[20ch]">{{ activeModule.title_display }}</h2>
+          <p class="text-[16px] text-[var(--muted)] max-w-[60ch] mb-8 leading-relaxed">{{ activeModule.purpose }}</p>
+          <article class="prose-genie max-w-[68ch]" v-html="renderMd(activeModule.raw)"></article>
+
+          <!-- prev/next -->
+          <div class="mt-14 pt-6 border-t hairline flex justify-between gap-4">
+            <button v-if="activeModuleIndex > 0" class="btn btn-ghost" @click="openModule(data.modules[activeModuleIndex-1])">
+              <svg class="icon" width="14" height="14" viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+              {{ t('previous') }}
+            </button>
+            <span v-else></span>
+            <button v-if="activeModuleIndex < data.modules.length-1" class="btn btn-primary" @click="openModule(data.modules[activeModuleIndex+1])">
+              {{ t('next') }}
+              <svg class="icon" width="14" height="14" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
             </button>
           </div>
-          <div v-else class="text-stone">{{ t('not_available') }}</div>
-        </div>
-        <div v-else class="max-w-[820px] mx-auto">
-          <button @click="activeModule = -1" class="text-sm text-link-blue hover:underline mb-6">← {{ t('back_to_modules') }}</button>
-          <div class="prose-genie" v-html="md(currentModule.raw)"></div>
-        </div>
+        </template>
       </section>
 
-      <!-- GLOSSARY -->
-      <section v-else-if="view === 'glossary'" class="px-6 md:px-12 py-12 max-w-[820px] mx-auto">
-        <h2 class="text-3xl font-semibold text-charcoal mb-2">{{ t('glossary') }}</h2>
-        <p class="text-sm text-stone mb-6">{{ t('glossary_subtitle') }}</p>
-        <input v-model="glossarySearch" type="search" :placeholder="t('search_terms')"
-          class="w-full mb-8 px-4 py-3 rounded-btn border border-hairline-strong focus:border-purple-genie focus:outline-none focus:ring-2 focus:ring-purple-genie/20 text-base" />
-        <div v-for="letter in filteredGlossary" :key="letter.letter" class="mb-8">
-          <h3 class="text-2xl font-semibold text-stone/80 mb-3">{{ letter.letter }}</h3>
-          <div class="space-y-3">
-            <div v-for="term in letter.terms" :key="term.term" class="p-4 rounded-card border border-hairline bg-white">
-              <div class="font-semibold text-charcoal text-base mb-1">{{ term.term }}</div>
-              <div class="text-sm text-slate prose-genie prose-mini" v-html="md(term.definition)"></div>
+      <!-- ========= GLOSSARY ========= -->
+      <section v-else-if="view === 'glossary'" :key="'v-glossary'" class="view-enter">
+        <header class="mb-8">
+          <div class="eyebrow mb-3">{{ t('glossary') }}</div>
+          <h2 class="display-serif text-[40px] sm:text-[56px] leading-none mb-3"><em>An</em> index<em class="text-[var(--accent)]">.</em></h2>
+          <p class="text-[15px] text-[var(--muted)] max-w-[55ch]">{{ t('glossary_subtitle') }}</p>
+        </header>
+
+        <div class="sticky top-[60px] z-10 -mx-2 px-2 py-3" :style="{background: 'color-mix(in oklab, var(--paper) 94%, transparent)', backdropFilter: 'blur(4px)'}">
+          <div class="relative">
+            <svg class="icon absolute left-4 top-1/2 -translate-y-1/2" width="16" height="16" viewBox="0 0 24 24" :style="{stroke: 'var(--muted)'}"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+            <input v-model="glossaryQuery" type="text" :placeholder="t('search_terms')"
+                   class="w-full pl-11 pr-4 py-3.5 rounded-xl border hairline bg-[var(--paper)] text-[15px] focus:outline-none focus:border-[var(--ink)] transition-colors" />
+          </div>
+        </div>
+
+        <div v-if="filteredGlossary.length" class="mt-8 space-y-12">
+          <div v-for="group in filteredGlossary" :key="group.letter" class="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-x-6 gap-y-2">
+            <div class="md:sticky md:top-[140px] self-start">
+              <div class="glossary-letter">{{ group.letter }}</div>
+              <div class="eyebrow mt-1">{{ group.terms.length }} {{ t('term_label') }}</div>
+            </div>
+            <div>
+              <div v-for="t in group.terms" :key="t.anchor" class="py-5 border-b hairline last:border-b-0">
+                <div class="flex items-baseline justify-between gap-4">
+                  <h3 class="font-serif text-[22px] leading-tight">{{ t.term }}</h3>
+                </div>
+                <div class="prose-mini mt-1.5" v-html="renderMdInline(t.definition)"></div>
+              </div>
             </div>
           </div>
         </div>
-        <div v-if="filteredGlossary.length === 0" class="text-stone text-center py-12">{{ t('no_results') }}</div>
+        <div v-else class="mt-12 rounded-2xl border hairline p-12 text-center">
+          <svg class="icon mx-auto mb-3" width="28" height="28" viewBox="0 0 24 24" :style="{stroke: 'var(--muted)'}"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+          <div class="text-[var(--muted)]">{{ t('no_results') }}</div>
+        </div>
       </section>
 
-      <!-- QUIZZES -->
-      <section v-else-if="view === 'quizzes'" class="px-6 md:px-12 py-12 max-w-[900px] mx-auto">
-        <h2 class="text-3xl font-semibold text-charcoal mb-2">{{ t('quizzes') }}</h2>
-        <p class="text-sm text-stone mb-6">{{ t('quizzes_subtitle') }}</p>
-        <div v-if="data.quizzes && data.quizzes.length" class="flex flex-wrap gap-2 mb-8">
-          <button v-for="q in data.quizzes" :key="q.id" @click="activeQuiz = q.id"
-            class="px-4 py-2 rounded-full text-sm font-medium transition border"
-            :class="activeQuiz === q.id ? 'bg-[#1a1a1a] text-white border-[#1a1a1a]' : 'bg-white text-charcoal border-hairline hover:border-hairline-strong'">
-            {{ q.title }}
-            <span class="ml-2 text-xs opacity-70">{{ quizProgress(q.id).answered }}/{{ quizProgress(q.id).total }}</span>
+      <!-- ========= QUIZZES ========= -->
+      <section v-else-if="view === 'quizzes'" :key="'v-quizzes'" class="view-enter">
+        <header class="mb-8">
+          <div class="eyebrow mb-3">{{ t('quizzes') }}</div>
+          <h2 class="display-serif text-[40px] sm:text-[56px] leading-none mb-3"><em>Check</em> your understanding<em class="text-[var(--accent)]">.</em></h2>
+          <p class="text-[15px] text-[var(--muted)] max-w-[55ch]">{{ t('quizzes_subtitle') }}</p>
+        </header>
+
+        <!-- quiz pills -->
+        <div class="flex flex-wrap gap-2 mb-10">
+          <button v-for="q in data.quizzes" :key="q.id"
+                  @click="activeQuizId = q.id"
+                  class="px-4 py-2 rounded-full border text-[13px] flex items-center gap-2 transition-colors"
+                  :class="activeQuizId === q.id ? 'bg-[var(--ink)] text-[var(--paper)] border-[var(--ink)]' : 'hairline text-[var(--muted)] hover:text-[var(--ink)] hover:border-[var(--ink)]'">
+            <span class="font-medium">{{ q.title }}</span>
+            <span class="font-mono text-[11px] opacity-70">{{ quizProgress(q).answered }}/{{ q.questions.length }}</span>
           </button>
         </div>
-        <div v-if="currentQuiz">
-          <div v-for="(question, qIdx) in currentQuiz.questions" :key="qIdx"
-            class="mb-6 p-6 rounded-card border border-hairline bg-white">
-            <div class="flex items-baseline gap-3 mb-4">
-              <span class="text-2xl font-semibold text-purple-genie shrink-0">{{ qIdx + 1 }}</span>
-              <div class="flex-1 min-w-0">
-                <div class="text-[11px] font-semibold uppercase tracking-wider text-stone mb-1">
-                  <span v-if="question.kind === 'mc'">{{ t('mc_label') }}</span>
-                  <span v-else-if="question.kind === 'short'">{{ t('short_label') }}</span>
-                  <span v-else>{{ t('trace_label') }}</span>
+
+        <template v-if="activeQuiz">
+          <div class="space-y-6">
+            <article v-for="(q, qi) in activeQuiz.questions" :key="qi"
+                     class="card p-7 sm:p-8">
+              <div class="flex items-center gap-3 mb-5">
+                <span class="font-mono text-[11px] text-[var(--muted-soft)]">Q{{ String(qi+1).padStart(2,'0') }}</span>
+                <span class="badge badge-accent">{{ q.kind === 'mc' ? t('mc_label') : q.kind === 'short' ? t('short_label') : t('trace_label') }}</span>
+              </div>
+              <h3 class="font-serif text-[22px] sm:text-[26px] leading-[1.25] mb-6 text-[var(--ink)]">{{ q.prompt }}</h3>
+
+              <!-- MC -->
+              <template v-if="q.kind === 'mc'">
+                <div class="space-y-2.5">
+                  <button v-for="opt in q.options" :key="opt.key"
+                          class="quiz-opt"
+                          :class="optionClass(activeQuiz.id, qi, q, opt)"
+                          @click="answerMc(activeQuiz.id, qi, opt.key)"
+                          :disabled="quizAnswered(activeQuiz.id, qi)">
+                    <span class="opt-key">{{ opt.key }}</span>
+                    <span class="text-[14.5px] leading-relaxed text-[var(--ink)]">{{ opt.text }}</span>
+                  </button>
                 </div>
-                <div class="prose-genie prose-mini text-charcoal" v-html="md(question.prompt)"></div>
+                <div v-if="quizAnswered(activeQuiz.id, qi) && q.explanation" class="reveal-in mt-5 p-4 rounded-xl border" :style="{background: 'var(--accent-soft)', borderColor: 'transparent'}">
+                  <div class="eyebrow mb-1.5" :style="{color: 'var(--accent-ink)'}">{{ t('explanation') }}</div>
+                  <div class="text-[14px] leading-relaxed" :style="{color: 'var(--accent-ink)'}">{{ q.explanation }}</div>
+                </div>
+              </template>
+
+              <!-- Short -->
+              <template v-else-if="q.kind === 'short'">
+                <textarea v-model="shortAnswers[shortKey(activeQuiz.id, qi)]"
+                          :placeholder="t('your_answer')"
+                          rows="3"
+                          class="w-full p-4 rounded-xl border hairline bg-[var(--paper-2)] text-[14.5px] leading-relaxed focus:outline-none focus:border-[var(--ink)]"></textarea>
+                <div class="mt-4 flex items-center gap-3">
+                  <button class="btn btn-primary" @click="revealShort(activeQuiz.id, qi)">{{ t('reveal_answer') }}</button>
+                  <span v-if="shortRevealed[shortKey(activeQuiz.id, qi)]" class="text-[12.5px] text-[var(--muted)] font-mono">— answered</span>
+                </div>
+                <div v-if="shortRevealed[shortKey(activeQuiz.id, qi)]" class="reveal-in mt-5 p-5 rounded-xl border hairline" :style="{background: 'var(--paper-2)'}">
+                  <div class="eyebrow mb-2">{{ t('reference_answer') }}</div>
+                  <div class="prose-mini" v-html="renderMd(q.answer)"></div>
+                </div>
+              </template>
+
+              <!-- Trace -->
+              <template v-else>
+                <div class="prose-mini p-5 rounded-xl border hairline" :style="{background: 'var(--paper-2)'}" v-html="renderMd(q.answer || '')"></div>
+              </template>
+            </article>
+          </div>
+        </template>
+        <div v-else class="rounded-2xl border hairline p-12 text-center text-[var(--muted)]">
+          {{ t('select_quiz') }}
+        </div>
+      </section>
+
+      <!-- ========= FLASHCARDS ========= -->
+      <section v-else-if="view === 'flashcards'" :key="'v-flashcards'" class="view-enter">
+        <header class="mb-8">
+          <div class="eyebrow mb-3">{{ t('flashcards') }}</div>
+          <h2 class="display-serif text-[40px] sm:text-[56px] leading-none mb-3"><em>Recall</em>, repeat<em class="text-[var(--accent)]">.</em></h2>
+          <p class="text-[15px] text-[var(--muted)] max-w-[55ch]">{{ t('flashcards_subtitle') }}</p>
+        </header>
+
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-7">
+          <div class="seg">
+            <button @click="flashFilter = 'all'" :class="{'is-active': flashFilter === 'all'}">{{ t('show_all') }}</button>
+            <button @click="flashFilter = 'unknown'" :class="{'is-active': flashFilter === 'unknown'}">{{ t('show_only_unknown') }}</button>
+          </div>
+          <div class="font-mono text-[12px] text-[var(--muted)]">
+            <span class="text-[var(--ink)] font-medium">{{ knownCount }}</span> / {{ data.flashcards.length }} {{ t('known_marker') }}
+          </div>
+        </div>
+
+        <template v-if="visibleFlashcards.length">
+          <div class="flip-scene max-w-[680px] mx-auto">
+            <div class="flip-card" :class="{'is-flipped': flipped}">
+              <div class="flip-face flip-front" @click="flipped = true">
+                <div class="flex items-center justify-between">
+                  <span class="badge">{{ currentFlash.source === 'glossary' ? t('term_label') : t('question_label') }}</span>
+                  <span class="font-mono text-[11px] text-[var(--muted-soft)]">{{ flashIndex+1 }} / {{ visibleFlashcards.length }}</span>
+                </div>
+                <div class="flex-1 flex items-center justify-center px-4 text-center">
+                  <h3 class="font-serif text-[34px] sm:text-[44px] leading-[1.05] text-[var(--ink)]">{{ currentFlash.front }}</h3>
+                </div>
+                <div class="text-center text-[12px] text-[var(--muted)] smallcaps">{{ t('click_to_flip') }}</div>
+              </div>
+              <div class="flip-face flip-back" @click="flipped = false">
+                <div class="flex items-center justify-between">
+                  <span class="badge" :style="{background: 'color-mix(in oklab, var(--lavender-deep) 14%, transparent)', color: 'var(--lavender-deep)', borderColor: 'transparent'}">
+                    {{ currentFlash.source === 'glossary' ? t('term_label') : t('question_label') }}
+                  </span>
+                  <span class="font-mono text-[11px]" :style="{color: 'color-mix(in oklab, var(--lavender-deep) 60%, transparent)'}">{{ flashIndex+1 }} / {{ visibleFlashcards.length }}</span>
+                </div>
+                <div class="flex-1 overflow-y-auto py-4 prose-mini" v-html="renderMd(currentFlash.back)"></div>
+                <div class="text-center text-[12px] smallcaps" :style="{color: 'color-mix(in oklab, var(--lavender-deep) 60%, transparent)'}">{{ t('click_to_flip') }}</div>
               </div>
             </div>
+          </div>
 
-            <div v-if="question.kind === 'mc'" class="space-y-2 ml-0 sm:ml-12">
-              <button v-for="opt in question.options" :key="opt.key" @click="handleQuizSelect(qIdx, opt.key)"
-                class="w-full text-left px-4 py-3 rounded-btn border transition flex items-start gap-3"
-                :class="[
-                  !isAnswered(qIdx) ? 'border-hairline hover:border-purple-genie/50 bg-white cursor-pointer' : 'cursor-default',
-                  isAnswered(qIdx) && opt.key === question.answer_key ? 'border-success bg-success/10' : '',
-                  isAnswered(qIdx) && opt.key === selectedOption(qIdx) && opt.key !== question.answer_key ? 'border-error bg-error/10' : '',
-                  isAnswered(qIdx) && opt.key !== question.answer_key && opt.key !== selectedOption(qIdx) ? 'border-hairline opacity-60 bg-white' : ''
-                ]">
-                <span class="font-semibold text-charcoal w-5 shrink-0">{{ opt.key }}</span>
-                <span class="text-charcoal flex-1 prose-genie prose-mini" v-html="md(opt.text)"></span>
-                <span v-if="isAnswered(qIdx) && opt.key === question.answer_key" class="text-success font-semibold">✓</span>
-                <span v-if="isAnswered(qIdx) && opt.key === selectedOption(qIdx) && opt.key !== question.answer_key" class="text-error font-semibold">✗</span>
+          <div class="max-w-[680px] mx-auto mt-7 flex flex-wrap items-center justify-between gap-4">
+            <button class="btn btn-ghost" @click="prevFlash" :disabled="visibleFlashcards.length < 2">
+              <svg class="icon" width="14" height="14" viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+              {{ t('previous') }}
+            </button>
+            <div class="flex gap-3">
+              <button class="btn btn-ghost" @click="markFlash(false)" :style="{borderColor: 'var(--wrong)', color: 'var(--wrong)'}">
+                {{ t('didnt_know') }}
               </button>
-              <div v-if="isAnswered(qIdx)" class="mt-3 p-4 rounded-btn bg-tint-cream border border-hairline">
-                <div class="text-[11px] font-semibold uppercase tracking-wider text-stone mb-1">{{ t('explanation') }}</div>
-                <div class="text-sm text-charcoal prose-genie prose-mini" v-html="md(question.explanation || '')"></div>
-              </div>
+              <button class="btn btn-accent" @click="markFlash(true)">
+                {{ t('knew_it') }}
+              </button>
             </div>
-
-            <div v-else class="ml-0 sm:ml-12">
-              <textarea :value="userText(qIdx)" @input="handleQuizText(qIdx, $event)"
-                :placeholder="t('your_answer')" rows="4"
-                class="w-full px-4 py-3 rounded-btn border border-hairline-strong focus:border-purple-genie focus:outline-none focus:ring-2 focus:ring-purple-genie/20 text-sm font-mono"
-                :disabled="isAnswered(qIdx)"></textarea>
-              <div class="mt-3">
-                <button v-if="!isAnswered(qIdx)" @click="handleQuizReveal(qIdx)"
-                  class="px-4 py-2 rounded-btn bg-purple-genie text-white text-sm font-medium hover:bg-purple-genie-pressed">
-                  {{ t('reveal_answer') }}
-                </button>
-              </div>
-              <div v-if="isAnswered(qIdx)" class="mt-4 p-4 rounded-btn bg-tint-mint border border-hairline">
-                <div class="text-[11px] font-semibold uppercase tracking-wider text-stone mb-1">{{ t('reference_answer') }}</div>
-                <div class="text-sm text-charcoal prose-genie prose-mini" v-html="md(question.answer || '')"></div>
-              </div>
-            </div>
+            <button class="btn btn-ghost" @click="nextFlash" :disabled="visibleFlashcards.length < 2">
+              {{ t('next') }}
+              <svg class="icon" width="14" height="14" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </button>
           </div>
-        </div>
-        <div v-else class="text-stone">{{ t('select_quiz') }}</div>
-      </section>
-
-      <!-- FLASHCARDS -->
-      <section v-else-if="view === 'flashcards'" class="px-6 md:px-12 py-12 max-w-[700px] mx-auto">
-        <div class="flex items-center justify-between mb-2 gap-3 flex-wrap">
-          <h2 class="text-3xl font-semibold text-charcoal">{{ t('flashcards') }}</h2>
-          <div class="text-sm text-stone">{{ knownCount }} / {{ data.flashcards?.length || 0 }} {{ t('known_marker') }}</div>
-        </div>
-        <p class="text-sm text-stone mb-6">{{ t('flashcards_subtitle') }}</p>
-        <div class="flex gap-2 mb-6">
-          <button @click="flashcardFilter = 'all'; flashcardIdx = 0; flashcardFlipped = false"
-            class="px-3 py-1.5 rounded-full text-sm font-medium border transition"
-            :class="flashcardFilter === 'all' ? 'bg-[#1a1a1a] text-white border-[#1a1a1a]' : 'bg-white text-charcoal border-hairline hover:border-hairline-strong'">
-            {{ t('show_all') }}
-          </button>
-          <button @click="flashcardFilter = 'unknown'; flashcardIdx = 0; flashcardFlipped = false"
-            class="px-3 py-1.5 rounded-full text-sm font-medium border transition"
-            :class="flashcardFilter === 'unknown' ? 'bg-[#1a1a1a] text-white border-[#1a1a1a]' : 'bg-white text-charcoal border-hairline hover:border-hairline-strong'">
-            {{ t('show_only_unknown') }}
-          </button>
-        </div>
-
-        <div v-if="!currentFlashcard" class="text-center text-stone py-20 rounded-card border border-hairline bg-surface-genie">{{ t('no_flashcards') }}</div>
-        <div v-else>
-          <div class="text-[11px] font-semibold uppercase tracking-wider text-stone mb-2 text-center">
-            {{ flashcardIdx + 1 }} / {{ filteredFlashcards.length }}
-          </div>
-          <div class="flip-card cursor-pointer mb-6 select-none" :class="{ flipped: flashcardFlipped }" @click="flashcardFlipped = !flashcardFlipped" style="height: 340px">
-            <div class="flip-card-inner">
-              <div class="flip-face absolute inset-0 p-8 rounded-card border border-hairline bg-white flex items-center justify-center text-center shadow-mockup">
-                <div class="max-w-full">
-                  <div class="text-[11px] font-semibold uppercase tracking-wider text-stone mb-3">{{ currentFlashcard.source === 'glossary' ? t('term_label') : t('question_label') }}</div>
-                  <div class="text-2xl font-semibold text-charcoal prose-genie prose-mini" v-html="md(currentFlashcard.front)"></div>
-                  <div class="text-xs text-stone mt-6">{{ t('click_to_flip') }}</div>
-                </div>
-              </div>
-              <div class="flip-face flip-face-back absolute inset-0 p-6 rounded-card border-2 border-purple-genie bg-tint-lavender flex items-center justify-center text-center shadow-mockup overflow-y-auto">
-                <div class="prose-genie prose-mini text-charcoal text-left w-full" v-html="md(currentFlashcard.back)"></div>
-              </div>
-            </div>
-          </div>
-
-          <div class="flex justify-between items-center gap-2 flex-wrap">
-            <button @click="flashcardPrev" class="px-4 py-2 rounded-btn border border-hairline-strong text-charcoal text-sm font-medium hover:bg-surface-genie">← {{ t('previous') }}</button>
-            <div class="flex gap-2">
-              <button @click="markFlashcard('unknown')" class="px-4 py-2 rounded-btn border border-hairline-strong text-charcoal text-sm font-medium hover:bg-surface-genie">{{ t('didnt_know') }}</button>
-              <button @click="markFlashcard('known')" class="px-4 py-2 rounded-btn bg-success text-white text-sm font-medium hover:opacity-90">{{ t('knew_it') }}</button>
-            </div>
-            <button @click="flashcardNext" class="px-4 py-2 rounded-btn border border-hairline-strong text-charcoal text-sm font-medium hover:bg-surface-genie">{{ t('next') }} →</button>
-          </div>
+        </template>
+        <div v-else class="rounded-2xl border hairline p-12 text-center text-[var(--muted)]">
+          <svg class="icon mx-auto mb-3" width="28" height="28" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg>
+          {{ t('no_flashcards') }}
         </div>
       </section>
 
-      <!-- PODCAST -->
-      <section v-else-if="view === 'podcast'" class="px-6 md:px-12 py-12 max-w-[820px] mx-auto">
-        <h2 class="text-3xl font-semibold text-charcoal mb-2">{{ t('podcast') }}</h2>
-        <p class="text-sm text-stone mb-6">{{ t('podcast_subtitle') }}</p>
-        <div v-if="data.podcast?.audio_file" class="mb-8 p-6 rounded-card bg-tint-lavender border border-hairline">
-          <div class="text-[11px] font-semibold uppercase tracking-wider text-charcoal/70 mb-3">{{ t('listen_label') }}</div>
-          <audio :src="data.podcast.audio_file" controls preload="metadata" class="w-full"></audio>
+      <!-- ========= PODCAST ========= -->
+      <section v-else-if="view === 'podcast'" :key="'v-podcast'" class="view-enter">
+        <header class="mb-8">
+          <div class="eyebrow mb-3">{{ t('podcast') }}</div>
+          <h2 class="display-serif text-[40px] sm:text-[56px] leading-none mb-3"><em>The</em> audio companion<em class="text-[var(--accent)]">.</em></h2>
+          <p class="text-[15px] text-[var(--muted)] max-w-[55ch]">{{ t('podcast_subtitle') }}</p>
+        </header>
+
+        <div v-if="data.podcast && data.podcast.audio_file" class="card p-6 sm:p-7 mb-10" :style="{background: 'var(--paper-2)'}">
+          <div class="flex items-center gap-4 mb-5">
+            <div class="w-14 h-14 rounded-xl flex items-center justify-center" :style="{background: 'var(--accent)', color: 'white'}">
+              <svg class="icon" width="22" height="22" viewBox="0 0 24 24" :style="{stroke: 'currentColor'}"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 11-14 0v-2M12 19v4M8 23h8"/></svg>
+            </div>
+            <div>
+              <div class="eyebrow mb-1">{{ t('listen_label') }}</div>
+              <div class="font-serif text-[24px]">{{ data.title_display }}</div>
+            </div>
+          </div>
+          <audio controls preload="metadata" :src="data.podcast.audio_file"></audio>
         </div>
-        <div v-else class="mb-8 p-6 rounded-card bg-tint-yellow border border-hairline">
-          <div class="text-sm font-semibold text-charcoal mb-2">{{ t('audio_coming_soon') }}</div>
-          <p class="text-xs text-charcoal/70 mb-3">{{ t('audio_hint') }}</p>
-          <code class="text-xs bg-white/60 px-2 py-1 rounded block w-fit">python scripts/gemini_podcast.py content/{{ data.owner_name }}/</code>
+
+        <div v-else class="rounded-2xl border p-6 sm:p-7 mb-10"
+             :style="{background: 'oklch(0.97 0.04 90)', borderColor: 'oklch(0.85 0.08 90)', color: 'oklch(0.32 0.08 80)'}">
+          <div class="flex items-start gap-4">
+            <svg class="icon flex-shrink-0 mt-1" width="22" height="22" viewBox="0 0 24 24" :style="{stroke: 'oklch(0.45 0.12 75)'}"><path d="M12 8v5M12 17v.01"/><circle cx="12" cy="12" r="9"/></svg>
+            <div class="flex-1">
+              <h3 class="font-serif text-[22px] mb-1">{{ t('audio_coming_soon') }}</h3>
+              <p class="text-[14px] leading-relaxed mb-4 opacity-85">{{ t('audio_hint') }}</p>
+              <pre class="mt-2 rounded-lg p-3 font-mono text-[12.5px] overflow-x-auto" :style="{background: 'oklch(0.22 0.04 80)', color: 'oklch(0.95 0.03 80)'}"><code>genie podcast --course {{ data.owner_name }}</code></pre>
+            </div>
+          </div>
         </div>
-        <div v-if="data.podcast?.script_raw" class="prose-genie" v-html="md(data.podcast.script_raw)"></div>
+
+        <article v-if="data.podcast && data.podcast.script_raw" class="prose-genie max-w-[68ch]" v-html="renderMd(data.podcast.script_raw)"></article>
       </section>
+
     </main>
   </div>
 
-  <footer class="border-t border-hairline px-6 py-6 text-center text-xs text-stone">
-    {{ t('footer_built') }}
-    <a href="https://github.com/anthropics/claude-code" target="_blank" rel="noopener" class="text-link-blue underline">Genie Learning</a>.
+  <!-- Footer -->
+  <footer class="mt-20 border-t hairline">
+    <div class="container-page py-8 flex flex-wrap items-center justify-between gap-3 text-[12.5px] text-[var(--muted)]">
+      <div>
+        {{ t('footer_built') }}
+        <a href="#" class="text-[var(--ink)] hover:text-[var(--accent)] underline decoration-[var(--hairline-2)] underline-offset-2">Genie Learning</a>
+      </div>
+      <div class="font-mono">{{ data.owner_name }} · v{{ data.schema_version }}</div>
+    </div>
   </footer>
+
+  <!-- Tweaks launch + panel -->
+  <button class="tweaks-launch" @click="tweaksOpen = !tweaksOpen" aria-label="Tweaks">
+    <svg class="icon" width="18" height="18" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+  </button>
+
+  <div class="tweaks-panel" :class="{'is-hidden': !tweaksOpen}">
+    <div class="flex items-center justify-between mb-3">
+      <div class="eyebrow">Tweaks</div>
+      <button class="p-1 rounded hover:bg-[var(--paper-2)]" @click="tweaksOpen = false">
+        <svg class="icon" width="14" height="14" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+
+    <div class="space-y-4">
+      <div>
+        <div class="text-[11.5px] text-[var(--muted)] mb-1.5 font-medium">Theme</div>
+        <div class="seg">
+          <button :class="{'is-active': theme === 'light'}" @click="theme = 'light'">Light</button>
+          <button :class="{'is-active': theme === 'dark'}" @click="theme = 'dark'">Dark</button>
+        </div>
+      </div>
+
+      <div>
+        <div class="text-[11.5px] text-[var(--muted)] mb-1.5 font-medium">Accent</div>
+        <div class="swatch-row">
+          <button class="swatch" data-color="moss" :class="{'is-active': accent === 'moss'}" @click="accent='moss'" aria-label="Moss"></button>
+          <button class="swatch" data-color="terracotta" :class="{'is-active': accent === 'terracotta'}" @click="accent='terracotta'" aria-label="Terracotta"></button>
+          <button class="swatch" data-color="indigo" :class="{'is-active': accent === 'indigo'}" @click="accent='indigo'" aria-label="Indigo"></button>
+        </div>
+      </div>
+
+      <div>
+        <div class="text-[11.5px] text-[var(--muted)] mb-1.5 font-medium">Density</div>
+        <div class="seg">
+          <button :class="{'is-active': density === 'comfortable'}" @click="density = 'comfortable'">Comfortable</button>
+          <button :class="{'is-active': density === 'compact'}" @click="density = 'compact'">Compact</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
-        `,
+
+<script>
+/* ===== Sample data (replaced at build by base64 inject) ===== */
+\nObject.assign(app, EventEmitter.prototype);\nObject.assign(app, application);\n```\n\nIsso permite que \`app\` seja tanto **chamado como middleware** (`http.createServer(app)`) quanto **mutado com métodos** (`app.get`, `app.use`)."
+    },
+    { slug: "03-middleware", name: "middleware", title_display: "Middleware: o coração do Express",
+      purpose: "Como funciona o stack de middlewares e por que `next()` é a peça-chave.",
+      raw: "# Middleware\n\nUm middleware é apenas uma função com a assinatura `(req, res, next)`. O Express mantém uma **pilha** dessas funções e as executa em ordem.\n\n## O contrato\n\nCada middleware deve:\n\n1. Realizar seu trabalho.\n2. Chamar `next()` para passar adiante, **ou** terminar a resposta com `res.send()`/`res.end()`.\n3. Chamar `next(err)` para pular para o middleware de erro."
+    },
+    { slug: "04-routing", name: "routing", title_display: "Roteamento e o objeto Router",
+      purpose: "A diferença entre `app` e `Router`, e como compor sub-aplicações.",
+      raw: "# Roteamento\n\nUm \`Router\` é um mini-app: ele tem seu próprio stack de middleware e seu próprio mapa de rotas. Você pode montá-lo onde quiser com \`app.use(path, router)\`."
+    },
+    { slug: "05-request-response", name: "request-response", title_display: "Request & Response",
+      purpose: "Os helpers que o Express adiciona a `req` e `res` — e como eles são implementados.",
+      raw: "# Request & Response\n\nObjetos \`req\` e \`res\` do Express são prototípicos dos do Node — eles **estendem** `IncomingMessage` e `ServerResponse`, adicionando uma camada de açúcar sintático."
+    },
+    { slug: "06-error-handling", name: "error-handling", title_display: "Tratamento de erros",
+      purpose: "Como o middleware de quatro argumentos captura erros, e por que a ordem importa.",
+      raw: "# Tratamento de erros\n\nO Express identifica middlewares de erro pela aridade: assinatura `(err, req, res, next)`. Eles **só executam** quando algum middleware chamou `next(err)`."
+    }
+  ],
+  quizzes: [
+    {
+      id: "general-quiz",
+      title: "Simulado geral",
+      questions: [
+        { kind: "mc",
+          prompt: "Qual é a assinatura padrão de um middleware no Express?",
+          options: [
+            { key: "A", text: "(req, res)" },
+            { key: "B", text: "(req, res, next)" },
+            { key: "C", text: "(ctx)" },
+            { key: "D", text: "(req, res, callback, error)" }
+          ],
+          answer_key: "B",
+          explanation: "Middlewares regulares têm três parâmetros. Middlewares de erro usam quatro: (err, req, res, next)."
+        },
+        { kind: "mc",
+          prompt: "O que `app.use(path, subApp)` faz?",
+          options: [
+            { key: "A", text: "Substitui o app principal pelo sub-app." },
+            { key: "B", text: "Monta o sub-app no caminho indicado." },
+            { key: "C", text: "Faz proxy reverso para o sub-app." },
+            { key: "D", text: "Executa o sub-app uma única vez." }
+          ],
+          answer_key: "B",
+          explanation: "O Express monta o sub-app — ele passa a responder por requisições cujo path começa com o prefixo dado."
+        },
+        { kind: "short",
+          prompt: "Em uma frase, explique a função do `next()`.",
+          answer: "**`next()`** passa o controle ao próximo middleware na pilha. Sem ele, a requisição fica pendurada e nunca recebe resposta — a menos que o middleware atual termine o ciclo com `res.send()` ou equivalente."
+        },
+        { kind: "mc",
+          prompt: "Qual método HTTP é semanticamente usado para *substituir* um recurso?",
+          options: [
+            { key: "A", text: "GET" },
+            { key: "B", text: "POST" },
+            { key: "C", text: "PUT" },
+            { key: "D", text: "PATCH" }
+          ],
+          answer_key: "C",
+          explanation: "PUT substitui o recurso inteiro; PATCH aplica alterações parciais."
+        }
+      ]
+    },
+    {
+      id: "middleware-quiz",
+      title: "Middleware em profundidade",
+      questions: [
+        { kind: "mc",
+          prompt: "Como o Express identifica um middleware de erro?",
+          options: [
+            { key: "A", text: "Pelo nome da função." },
+            { key: "B", text: "Pela aridade — quatro parâmetros." },
+            { key: "C", text: "Por uma flag passada a `app.use`." },
+            { key: "D", text: "Não há diferença." }
+          ],
+          answer_key: "B",
+          explanation: "A função `Function.prototype.length` retorna 4, e o Express checa isso para classificá-lo como tratador de erros."
+        },
+        { kind: "short",
+          prompt: "Quando você chamaria `next('route')` em vez de `next()`?",
+          answer: "**`next('route')`** sai do *route handler* atual e passa para a próxima rota correspondente — útil quando você quer pular para a próxima possibilidade de match sem chamar middleware de erro."
+        }
+      ]
+    }
+  ],
+  flashcards: [
+    { front: "Middleware", back: "**Funções `(req, res, next)`** que têm acesso a req/res e à próxima função do stack. São a base do modelo de execução do Express.", source: "glossary", anchor: "middleware" },
+    { front: "Router", back: "**Mini-app independente** com seu próprio stack de middleware. Pode ser montado em qualquer caminho via `app.use(path, router)`.", source: "glossary", anchor: "router" },
+    { front: "Mountpath", back: "O **caminho de montagem** de um sub-app. Disponível em `req.baseUrl` para handlers internos.", source: "glossary", anchor: "mountpath" },
+    { front: "Qual a assinatura padrão de um middleware?", back: "**B. (req, res, next)**\n\nMiddlewares regulares têm 3 parâmetros; middlewares de erro têm 4.", source: "quiz", quiz_id: "general-quiz" },
+    { front: "O que `app.use(path, subApp)` faz?", back: "**B. Monta o sub-app no caminho indicado.**\n\nO sub-app responde por todas as requisições cujo path começa com o prefixo dado.", source: "quiz", quiz_id: "general-quiz" },
+    { front: "Application", back: "A **instância retornada por `express()`**. Encapsula roteador, stack de middlewares, e configurações via `app.set`.", source: "glossary", anchor: "application" },
+    { front: "Trust proxy", back: "Configuração que diz ao Express para **confiar nos cabeçalhos `X-Forwarded-*`**. Útil atrás de balanceadores.", source: "glossary", anchor: "trust-proxy" }
+  ],
+  podcast: {
+    script_raw: `## Roteiro do episódio
+
+**Narrador:** Bem-vindo ao guia em áudio do Express. Neste episódio, vamos percorrer os fundamentos do framework — sua filosofia, sua arquitetura, e os três conceitos que você precisa entender para nunca mais ficar perdido na pilha de middlewares.
+
+**Convidado:** A primeira coisa a entender é que o Express é, no fundo, *uma função*. Quando você escreve \`const app = express()\`, o que você está recebendo é uma função que sabe lidar com um par \`req\`/\`res\`.
+
+**Narrador:** E essa função vai sendo *decorada* com métodos…
+
+**Convidado:** Exatamente. \`app.get\`, \`app.use\`, \`app.set\` — todos eles são adicionados a essa função-objeto. É essa dualidade que permite passar \`app\` direto para \`http.createServer\`.
+
+## Bloco 2 — Middleware
+
+**Narrador:** Vamos falar de middleware. Por que esse padrão é tão central?
+
+**Convidado:** Porque ele resolve um problema fundamental do HTTP: o ciclo de vida de uma requisição tem muitos estágios — parsing, autenticação, autorização, logging, resposta. Em vez de empurrar tudo isso para um único handler, o Express deixa você compor.`,
+    audio_file: null,
+    metadata: { language: "pt-BR", modules: [] }
+  }
+};
+
+/* ===== Boot ===== */
+window.__COURSE_DATA = JSON.parse(atob("/* GENIE_DATA */"));
+
+const STORAGE_KEY = 'genie:' + (window.__COURSE_DATA.owner_name || 'course');
+
+function loadState() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; }
+}
+function saveState(s) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); } catch {}
+}
+
+const { createApp, ref, computed, watch, onMounted } = Vue;
+
+const app = createApp({
+  setup() {
+    const data = ref(window.__COURSE_DATA);
+    const persisted = loadState();
+
+    const view = ref(persisted.view || 'overview');
+    const drawerOpen = ref(false);
+    const tweaksOpen = ref(false);
+
+    const theme = ref(persisted.theme || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+    const accent = ref(persisted.accent || 'moss');
+    const density = ref(persisted.density || 'comfortable');
+
+    const activeModule = ref(null);
+    const glossaryQuery = ref('');
+
+    const activeQuizId = ref(persisted.activeQuizId || (data.value.quizzes[0] && data.value.quizzes[0].id) || null);
+    const mcAnswers = ref(persisted.mcAnswers || {});         // { quizId: { qi: 'B' } }
+    const shortAnswers = ref(persisted.shortAnswers || {});   // { 'quizId:qi': text }
+    const shortRevealed = ref(persisted.shortRevealed || {}); // { 'quizId:qi': true }
+
+    const flashIndex = ref(persisted.flashIndex || 0);
+    const flashFilter = ref(persisted.flashFilter || 'all');
+    const flipped = ref(false);
+    const knownMap = ref(persisted.knownMap || {});           // { 'front-hash': true }
+
+    /* ---------- i18n ---------- */
+    const t = (key) => (data.value.chrome && data.value.chrome[key]) || key;
+
+    /* ---------- Markdown rendering ---------- */
+    if (window.marked) {
+      window.marked.use({
+        breaks: false, gfm: true,
+        renderer: {
+          link({href, title, text}) {
+            return `<a href="${href}" ${title ? `title="${title}"` : ''} target="_blank" rel="noopener">${text}</a>`;
+          }
+        }
       });
-      app.mount('#app');
-    })();
-  </script>
+    }
+    const renderMd = (md) => md ? window.marked.parse(md) : '';
+    const renderMdInline = (md) => {
+      if (!md) return '';
+      const html = window.marked.parseInline(md);
+      return html;
+    };
+
+    /* ---------- Computed ---------- */
+    const titleDisplay = computed(() => {
+      const t = data.value.title_display || '';
+      // Add subtle italic to first word for editorial feel
+      const parts = t.split(' ');
+      if (parts.length < 2) return t;
+      return parts.join(' ');
+    });
+
+    const shortRepo = computed(() => {
+      if (!data.value.repo_url) return '';
+      try {
+        const u = new URL(data.value.repo_url);
+        return u.pathname.replace(/^\//, '');
+      } catch { return data.value.repo_url; }
+    });
+
+    const glossaryCount = computed(() =>
+      data.value.glossary.reduce((acc, g) => acc + g.terms.length, 0)
+    );
+
+    const navItems = computed(() => [
+      { id: 'overview',   label: t('overview') },
+      { id: 'tutorial',   label: t('tutorial') },
+      { id: 'modules',    label: t('modules'),    count: data.value.modules.length },
+      { id: 'glossary',   label: t('glossary'),   count: glossaryCount.value },
+      { id: 'quizzes',    label: t('quizzes'),    count: data.value.quizzes.length },
+      { id: 'flashcards', label: t('flashcards'), count: data.value.flashcards.length },
+      { id: 'podcast',    label: t('podcast') },
+    ]);
+
+    const filteredGlossary = computed(() => {
+      const q = glossaryQuery.value.trim().toLowerCase();
+      if (!q) return data.value.glossary;
+      return data.value.glossary.map(group => ({
+        letter: group.letter,
+        terms: group.terms.filter(term =>
+          term.term.toLowerCase().includes(q) ||
+          term.definition.toLowerCase().includes(q)
+        )
+      })).filter(group => group.terms.length > 0);
+    });
+
+    const activeModuleIndex = computed(() =>
+      activeModule.value ? data.value.modules.findIndex(m => m.slug === activeModule.value.slug) : -1
+    );
+    const openModule = (m) => { activeModule.value = m; window.scrollTo({top: 0, behavior: 'smooth'}); };
+
+    const activeQuiz = computed(() => data.value.quizzes.find(q => q.id === activeQuizId.value));
+    const shortKey = (qid, qi) => `${qid}:${qi}`;
+    const quizAnswered = (qid, qi) => !!(mcAnswers.value[qid] && mcAnswers.value[qid][qi]);
+
+    const quizProgress = (q) => {
+      let answered = 0;
+      q.questions.forEach((qq, qi) => {
+        if (qq.kind === 'mc') {
+          if (mcAnswers.value[q.id] && mcAnswers.value[q.id][qi]) answered++;
+        } else if (qq.kind === 'short') {
+          if (shortRevealed.value[shortKey(q.id, qi)]) answered++;
+        } else {
+          answered++; // trace always "answered"
+        }
+      });
+      return { answered };
+    };
+
+    const answerMc = (qid, qi, key) => {
+      if (!mcAnswers.value[qid]) mcAnswers.value[qid] = {};
+      if (mcAnswers.value[qid][qi]) return;
+      mcAnswers.value[qid] = { ...mcAnswers.value[qid], [qi]: key };
+    };
+
+    const revealShort = (qid, qi) => {
+      shortRevealed.value = { ...shortRevealed.value, [shortKey(qid, qi)]: true };
+    };
+
+    const optionClass = (qid, qi, q, opt) => {
+      const userAns = mcAnswers.value[qid] && mcAnswers.value[qid][qi];
+      if (!userAns) return '';
+      if (opt.key === q.answer_key) return 'is-correct';
+      if (opt.key === userAns) return 'is-wrong';
+      return 'opacity-60';
+    };
+
+    /* ---------- Module card tints ---------- */
+    const moduleTintStyle = (idx) => {
+      const slot = idx % 6;
+      return {
+        background: `var(--tint-${slot})`,
+        '--tint-ink': `var(--tint-ink-${slot})`,
+        borderColor: 'transparent'
+      };
+    };
+
+    /* ---------- Flashcards ---------- */
+    const flashHash = (f) => f.source + ':' + (f.anchor || f.front);
+    const visibleFlashcards = computed(() => {
+      if (flashFilter.value === 'unknown') {
+        return data.value.flashcards.filter(f => !knownMap.value[flashHash(f)]);
+      }
+      return data.value.flashcards;
+    });
+    const currentFlash = computed(() => visibleFlashcards.value[Math.min(flashIndex.value, visibleFlashcards.value.length - 1)] || data.value.flashcards[0]);
+    const knownCount = computed(() => data.value.flashcards.filter(f => knownMap.value[flashHash(f)]).length);
+
+    const prevFlash = () => {
+      if (!visibleFlashcards.value.length) return;
+      flipped.value = false;
+      flashIndex.value = (flashIndex.value - 1 + visibleFlashcards.value.length) % visibleFlashcards.value.length;
+    };
+    const nextFlash = () => {
+      if (!visibleFlashcards.value.length) return;
+      flipped.value = false;
+      flashIndex.value = (flashIndex.value + 1) % visibleFlashcards.value.length;
+    };
+    const markFlash = (known) => {
+      const f = currentFlash.value;
+      if (!f) return;
+      const h = flashHash(f);
+      const m = { ...knownMap.value };
+      if (known) m[h] = true; else delete m[h];
+      knownMap.value = m;
+      nextFlash();
+    };
+
+    /* ---------- Nav ---------- */
+    const goto = (id) => {
+      if (view.value !== id) {
+        view.value = id;
+        activeModule.value = null;
+        window.scrollTo({top: 0, behavior: 'smooth'});
+      }
+    };
+
+    /* ---------- Apply tweaks to <html> ---------- */
+    const applyTweaks = () => {
+      const root = document.documentElement;
+      root.setAttribute('data-theme', theme.value);
+      root.setAttribute('data-accent', accent.value);
+      root.setAttribute('data-density', density.value);
+    };
+
+    /* ---------- Persistence ---------- */
+    const persist = () => {
+      saveState({
+        view: view.value,
+        theme: theme.value,
+        accent: accent.value,
+        density: density.value,
+        activeQuizId: activeQuizId.value,
+        mcAnswers: mcAnswers.value,
+        shortAnswers: shortAnswers.value,
+        shortRevealed: shortRevealed.value,
+        flashIndex: flashIndex.value,
+        flashFilter: flashFilter.value,
+        knownMap: knownMap.value
+      });
+    };
+
+    watch([view, theme, accent, density, activeQuizId, flashIndex, flashFilter,
+           mcAnswers, shortAnswers, shortRevealed, knownMap], () => { persist(); }, { deep: true });
+    watch([theme, accent, density], applyTweaks, { immediate: true });
+    watch(flashFilter, () => { flashIndex.value = 0; flipped.value = false; });
+    watch(view, () => { flipped.value = false; });
+
+    onMounted(() => {
+      applyTweaks();
+      // keyboard: left/right for flashcards & modules
+      window.addEventListener('keydown', (e) => {
+        if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+        if (view.value === 'flashcards') {
+          if (e.key === 'ArrowRight') nextFlash();
+          if (e.key === 'ArrowLeft') prevFlash();
+          if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flipped.value = !flipped.value; }
+        }
+      });
+    });
+
+    return {
+      data, view, drawerOpen, tweaksOpen,
+      theme, accent, density,
+      activeModule, activeModuleIndex, openModule,
+      glossaryQuery, filteredGlossary, glossaryCount,
+      activeQuizId, activeQuiz, mcAnswers, shortAnswers, shortRevealed,
+      shortKey, quizAnswered, quizProgress, answerMc, revealShort, optionClass,
+      flashIndex, flashFilter, flipped, knownMap, knownCount,
+      visibleFlashcards, currentFlash, prevFlash, nextFlash, markFlash,
+      navItems, goto, t, renderMd, renderMdInline,
+      titleDisplay, shortRepo,
+      moduleTintStyle
+    };
+  }
+});
+
+app.mount('#app');
+</script>
 </body>
 </html>
