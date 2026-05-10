@@ -44,7 +44,7 @@ scripts/
     └── course.html              # Vue 3 + Tailwind template, /* GENIE_DATA */ injection
 
 CLAUDE.md                        # Project-level guidance loaded by Claude Code
-DESIGN.md                        # Notion-inspired design tokens for the renderer
+DESIGN.md                        # Paper & Ink design tokens for the renderer
 README.md                        # User-facing introduction
 ```
 
