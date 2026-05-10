@@ -7,7 +7,7 @@ Project that uses Claude Code subagents to generate educational content about Gi
 There are two skills:
 
 1. **`/genie-learn <github-url> [language] [max-workers]`** — generates the Markdown course.
-2. **`/genie-render <owner-name>`** — turns the generated course into one interactive `index.html` (Vue 3 + Tailwind, Notion-styled).
+2. **`/genie-render <owner-name>`** — turns the generated course into one interactive `index.html` (Vue 3 + Tailwind, Paper & Ink design).
 
 Examples:
 
@@ -41,7 +41,7 @@ The orchestrator also runs a read-only post-run audit in chat after `90-validati
 - **`.claude/agents/post-run-course-auditor.md`** — performs the final read-only post-run audit and returns a chat report without writing files.
 - **`.claude/skills/genie-render/SKILL.md`** — orchestrator for the HTML renderer. Invokes `scripts/render_course.py`.
 - **`scripts/render_course.py`** — deterministic Python renderer (stdlib only). Reads `content/<owner>-<name>/`, parses quizzes/glossary/modules, derives flashcards from glossary + multiple-choice questions, and writes `content/<owner>-<name>/index.html`.
-- **`scripts/templates/course.html`** — single-file template (Vue 3 + Tailwind via CDN, marked.js for client-side Markdown). Notion-styled per `DESIGN.md`.
+- **`scripts/templates/course.html`** — single-file template (Vue 3 + Tailwind via CDN, marked.js for client-side Markdown). Paper & Ink styled per `DESIGN.md`.
 
 ## Conventions
 
