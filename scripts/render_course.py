@@ -14,6 +14,7 @@ No third-party dependencies — only the Python standard library.
 from __future__ import annotations
 
 import argparse
+import base64
 import json
 import re
 import sys
@@ -528,12 +529,6 @@ def build_course_data(content_dir: Path, owner_name: str) -> dict[str, Any]:
 
     title_display = parse_first_h1(overview_raw) or owner_name
 
-    repo_url = None
-    if "/" in owner_name:
-        # owner_name is `<owner>-<name>` — best-effort guess. We don't store the URL anywhere
-        # canonical; leave as None and the UI hides the link.
-        pass
-
     return {
         "schema_version": 1,
         "owner_name": owner_name,
@@ -557,20 +552,19 @@ def build_course_data(content_dir: Path, owner_name: str) -> dict[str, Any]:
 
 def render(template_path: Path, course_data: dict[str, Any], output_path: Path) -> None:
     template = template_path.read_text(encoding="utf-8")
-    placeholder = "/* GENIE_DATA */ null"
+    placeholder = "/* GENIE_DATA */"
     if placeholder not in template:
         raise SystemExit(f"template missing placeholder `{placeholder}`")
     payload = json.dumps(course_data, ensure_ascii=False, separators=(",", ":"))
-    # Defang `</script>` sequences inside content so the inline JSON does not break the script tag.
-    payload = payload.replace("</script", "<\\/script")
-    payload = payload.replace("</style", "<\\/style")
-    output_path.write_text(template.replace(placeholder, payload, 1), encoding="utf-8")
+    b64 = base64.b64encode(payload.encode("utf-8")).decode("ascii")
+    output_path.write_text(template.replace(placeholder, b64, 1), encoding="utf-8")
 
 
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(description="Render a Genie Learning course as a single HTML file.")
     parser.add_argument("owner_name", help="Course directory name under content/ (e.g. expressjs-express).")
     parser.add_argument("--project-root", default=None, help="Project root (default: parent of scripts/).")
+    parser.add_argument("--check", action="store_true", help="Validate the course without writing HTML.")
     args = parser.parse_args(argv)
 
     project_root = Path(args.project_root) if args.project_root else Path(__file__).resolve().parent.parent
@@ -587,6 +581,17 @@ def main(argv: list[str]) -> int:
         return 2
 
     course_data = build_course_data(content_dir, args.owner_name)
+
+    if args.check:
+        n_modules = len(course_data["modules"])
+        n_quizzes = len(course_data["quizzes"])
+        n_cards = len(course_data["flashcards"])
+        n_terms = sum(len(letter["terms"]) for letter in course_data["glossary"])
+        audio_status = "yes" if course_data["podcast"]["audio_file"] else "no"
+        print(f"check: course '{args.owner_name}' is valid")
+        print(f"Modules: {n_modules} | Quizzes: {n_quizzes} | Glossary terms: {n_terms} | Flashcards: {n_cards} | Audio: {audio_status}")
+        return 0
+
     render(template_path, course_data, output_path)
 
     size_kb = output_path.stat().st_size / 1024
