@@ -233,8 +233,8 @@ KIND_PATTERNS: list[tuple[str, re.Pattern[str]]] = [
     ("short", re.compile(r"^\*\*\s*(?:Resposta curta|Short answer|Respuesta corta|Réponse courte|短答)\s*[:：]\s*\*\*\s*", re.IGNORECASE)),
 ]
 
-QUESTIONS_HEADING_RE = re.compile(r"^##\s+(?:Perguntas|Questions|Preguntas|質問)\s*$", re.MULTILINE)
-ANSWERS_HEADING_RE = re.compile(r"^##\s+(?:Gabarito|Answer key|Respuestas|Réponses|解答)\s*$", re.MULTILINE)
+QUESTIONS_HEADING_RE = re.compile(r"^##\s+(?:Perguntas|Questions|Preguntas|質問)\s*$", re.MULTILINE | re.IGNORECASE)
+ANSWERS_HEADING_RE = re.compile(r"^##\s+(?:Gabarito|Answer key|Respuestas|Réponses|解答)\s*$", re.MULTILINE | re.IGNORECASE)
 NUMBERED_ITEM_RE = re.compile(r"^(\d+)\.\s+", re.MULTILINE)
 MC_OPTION_RE = re.compile(r"^\s*-\s+([A-Z])\.\s+(.+)$")
 H1_RE = re.compile(r"^#\s+(.+)$", re.MULTILINE)
