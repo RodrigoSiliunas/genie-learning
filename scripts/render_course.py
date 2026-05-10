@@ -14,6 +14,7 @@ No third-party dependencies — only the Python standard library.
 from __future__ import annotations
 
 import argparse
+import base64
 import json
 import re
 import sys
@@ -557,14 +558,12 @@ def build_course_data(content_dir: Path, owner_name: str) -> dict[str, Any]:
 
 def render(template_path: Path, course_data: dict[str, Any], output_path: Path) -> None:
     template = template_path.read_text(encoding="utf-8")
-    placeholder = "/* GENIE_DATA */ null"
+    placeholder = "/* GENIE_DATA */"
     if placeholder not in template:
         raise SystemExit(f"template missing placeholder `{placeholder}`")
     payload = json.dumps(course_data, ensure_ascii=False, separators=(",", ":"))
-    # Defang `</script>` sequences inside content so the inline JSON does not break the script tag.
-    payload = payload.replace("</script", "<\\/script")
-    payload = payload.replace("</style", "<\\/style")
-    output_path.write_text(template.replace(placeholder, payload, 1), encoding="utf-8")
+    b64 = base64.b64encode(payload.encode("utf-8")).decode("ascii")
+    output_path.write_text(template.replace(placeholder, b64, 1), encoding="utf-8")
 
 
 def main(argv: list[str]) -> int:
