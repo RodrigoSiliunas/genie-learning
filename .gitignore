@@ -1,0 +1,10 @@
+repos/
+content/
+*.pyc
+__pycache__/
+.venv/
+.env
+!.env.example
+.DS_Store
+Thumbs.db
+.claude/settings.local.json

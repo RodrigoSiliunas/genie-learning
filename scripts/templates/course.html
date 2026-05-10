@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="generator" content="genie-render" />
+  <title>Genie Learning Course</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'purple-genie': '#5645d4',
+            'purple-genie-pressed': '#4534b3',
+            'navy-genie': '#0a1530',
+            'navy-genie-deep': '#070f24',
+            charcoal: '#37352f',
+            slate: '#5d5b54',
+            steel: '#787671',
+            stone: '#a4a097',
+            hairline: '#e5e3df',
+            'hairline-strong': '#c8c4be',
+            'surface-genie': '#f6f5f4',
+            'link-blue': '#0075de',
+            tint: {
+              peach: '#ffe8d4',
+              rose: '#fde0ec',
+              mint: '#d9f3e1',
+              lavender: '#e6e0f5',
+              sky: '#dcecfa',
+              yellow: '#fef7d6',
+              'yellow-bold': '#f9e79f',
+              cream: '#f8f5e8',
+            },
+            success: '#1aae39',
+            warning: '#dd5b00',
+            error: '#e03131',
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Helvetica', 'sans-serif'],
+            mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Consolas', 'monospace'],
+          },
+          borderRadius: {
+            btn: '8px',
+            card: '12px',
+          },
+          boxShadow: {
+            mockup: 'rgba(15, 15, 15, 0.20) 0px 24px 48px -8px',
+          },
+        },
+      },
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <style>
+    html, body { font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Helvetica, sans-serif; }
+    .prose-genie h1 { font-size: 36px; font-weight: 600; line-height: 1.2; letter-spacing: -0.5px; margin-bottom: 16px; color: #1a1a1a; }
+    .prose-genie h2 { font-size: 28px; font-weight: 600; line-height: 1.25; margin-top: 32px; margin-bottom: 12px; color: #1a1a1a; }
+    .prose-genie h3 { font-size: 22px; font-weight: 600; line-height: 1.3; margin-top: 24px; margin-bottom: 10px; color: #1a1a1a; }
+    .prose-genie h4 { font-size: 18px; font-weight: 600; line-height: 1.4; margin-top: 20px; margin-bottom: 8px; color: #37352f; }
+    .prose-genie p { font-size: 16px; line-height: 1.6; margin-bottom: 14px; color: #37352f; }
+    .prose-genie ul, .prose-genie ol { font-size: 16px; line-height: 1.6; padding-left: 24px; margin-bottom: 14px; color: #37352f; }
+    .prose-genie ul { list-style: disc; }
+    .prose-genie ol { list-style: decimal; }
+    .prose-genie li { margin-bottom: 6px; }
+    .prose-genie li > ul, .prose-genie li > ol { margin-top: 4px; margin-bottom: 4px; }
+    .prose-genie a { color: #0075de; text-decoration: underline; text-underline-offset: 2px; }
+    .prose-genie code { background: #f0eeec; color: #37352f; padding: 1px 6px; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 14px; }
+    .prose-genie pre { background: #f0eeec; color: #1a1a1a; padding: 16px; border-radius: 8px; overflow-x: auto; margin-bottom: 16px; }
+    .prose-genie pre code { background: transparent; padding: 0; font-size: 14px; line-height: 1.5; color: #1a1a1a; }
+    .prose-genie strong { font-weight: 600; color: #1a1a1a; }
+    .prose-genie em { font-style: italic; }
+    .prose-genie blockquote { border-left: 3px solid #5645d4; padding-left: 16px; color: #5d5b54; margin: 16px 0; font-style: italic; }
+    .prose-genie table { border-collapse: collapse; margin-bottom: 16px; font-size: 14px; width: 100%; }
+    .prose-genie th, .prose-genie td { border: 1px solid #e5e3df; padding: 8px 12px; text-align: left; vertical-align: top; }
+    .prose-genie th { background: #f6f5f4; font-weight: 600; }
+    .prose-genie hr { border: 0; border-top: 1px solid #e5e3df; margin: 24px 0; }
+    .prose-mini p { margin-bottom: 8px; }
+    .prose-mini p:last-child { margin-bottom: 0; }
+    .flip-card { perspective: 1500px; }
+    .flip-card-inner { transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; position: relative; width: 100%; height: 100%; }
+    .flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
+    .flip-face { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+    .flip-face-back { transform: rotateY(180deg); }
+    .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    [v-cloak] { display: none; }
+    /* Sticky-note dot motif on hero band */
+    .dot-grid::before {
+      content: ''; position: absolute; inset: 0; opacity: 0.45; pointer-events: none;
+      background-image:
+        radial-gradient(circle at 12% 18%, #ff64c8 0 7px, transparent 8px),
+        radial-gradient(circle at 88% 22%, #f5d75e 0 6px, transparent 7px),
+        radial-gradient(circle at 22% 78%, #1aae39 0 5px, transparent 6px),
+        radial-gradient(circle at 78% 82%, #dd5b00 0 6px, transparent 7px),
+        radial-gradient(circle at 50% 12%, #2a9d99 0 4px, transparent 5px),
+        radial-gradient(circle at 6% 50%, #7b3ff2 0 5px, transparent 6px),
+        radial-gradient(circle at 94% 55%, #ff64c8 0 4px, transparent 5px);
+    }
+  </style>
+</head>
+<body class="h-full text-charcoal antialiased bg-white">
+  <div id="app" v-cloak></div>
+  <script>
+    window.__COURSE_DATA = /* GENIE_DATA */ null;
+  </script>
+  <script>
+    (function () {
+      const data = window.__COURSE_DATA;
+      const mountEl = document.getElementById('app');
+      if (!data) {
+        mountEl.innerHTML = '<div style="padding: 60px; text-align: center; font-family: Inter, sans-serif; color: #787671;">Course data not loaded.</div>';
+        return;
+      }
+      document.documentElement.lang = data.language || 'en';
+      document.title = (data.title_display || data.owner_name) + ' — Genie Learning';
+
+      const { createApp, ref, computed, reactive, watch } = Vue;
+      marked.setOptions({ gfm: true, breaks: false });
+
+      const STORAGE_PREFIX = 'genie:' + data.owner_name + ':';
+      const t = (key) => (data.chrome && data.chrome[key]) || key;
+      const md = (raw) => marked.parse(raw || '');
+
+      const loadProgress = (key, fallback) => {
+        try {
+          const v = localStorage.getItem(STORAGE_PREFIX + key);
+          return v === null ? fallback : JSON.parse(v);
+        } catch (e) { return fallback; }
+      };
+      const saveProgress = (key, value) => {
+        try { localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(value)); } catch (e) { /* ignore */ }
+      };
+
+      const TINTS = ['peach', 'rose', 'mint', 'lavender', 'sky', 'yellow'];
+
+      const app = createApp({
+        setup() {
+          const view = ref(loadProgress('view', 'overview'));
+          const sidebarOpen = ref(false);
+          const activeModule = ref(-1);
+          const activeQuiz = ref((data.quizzes && data.quizzes[0] && data.quizzes[0].id) || null);
+          const flashcardIdx = ref(0);
+          const flashcardFlipped = ref(false);
+          const flashcardKnown = reactive(loadProgress('flashcards-known', {}));
+          const flashcardFilter = ref('all');
+          const quizState = reactive(loadProgress('quiz-state', {}));
+          const glossarySearch = ref('');
+
+          watch(view, (v) => saveProgress('view', v));
+          watch(quizState, (v) => saveProgress('quiz-state', JSON.parse(JSON.stringify(v))), { deep: true });
+          watch(flashcardKnown, (v) => saveProgress('flashcards-known', JSON.parse(JSON.stringify(v))), { deep: true });
+
+          const views = [
+            { id: 'overview', label: t('overview') },
+            { id: 'tutorial', label: t('tutorial') },
+            { id: 'modules', label: t('modules') },
+            { id: 'glossary', label: t('glossary') },
+            { id: 'quizzes', label: t('quizzes') },
+            { id: 'flashcards', label: t('flashcards') },
+            { id: 'podcast', label: t('podcast') },
+          ];
+
+          const tintForModule = (idx) => TINTS[idx % TINTS.length];
+
+          const currentQuiz = computed(() => (data.quizzes || []).find((q) => q.id === activeQuiz.value) || null);
+          const currentModule = computed(() => (data.modules && activeModule.value >= 0 && data.modules[activeModule.value]) || null);
+
+          const filteredFlashcards = computed(() => {
+            const all = data.flashcards || [];
+            if (flashcardFilter.value === 'unknown') return all.filter((c, i) => !flashcardKnown[i]);
+            return all;
+          });
+          const currentFlashcard = computed(() => {
+            const fc = filteredFlashcards.value;
+            if (fc.length === 0) return null;
+            return fc[flashcardIdx.value % fc.length];
+          });
+          const knownCount = computed(() => Object.values(flashcardKnown).filter((v) => v).length);
+
+          const filteredGlossary = computed(() => {
+            const q = glossarySearch.value.trim().toLowerCase();
+            const all = data.glossary || [];
+            if (!q) return all;
+            return all
+              .map((letter) => ({
+                letter: letter.letter,
+                terms: letter.terms.filter(
+                  (term) => term.term.toLowerCase().includes(q) || term.definition.toLowerCase().includes(q)
+                ),
+              }))
+              .filter((letter) => letter.terms.length > 0);
+          });
+
+          const handleQuizSelect = (qIdx, optKey) => {
+            const id = activeQuiz.value;
+            if (!quizState[id]) quizState[id] = {};
+            if (!quizState[id][qIdx]) quizState[id][qIdx] = {};
+            quizState[id][qIdx].selected = optKey;
+            quizState[id][qIdx].revealed = true;
+          };
+          const handleQuizReveal = (qIdx) => {
+            const id = activeQuiz.value;
+            if (!quizState[id]) quizState[id] = {};
+            if (!quizState[id][qIdx]) quizState[id][qIdx] = {};
+            quizState[id][qIdx].revealed = true;
+          };
+          const handleQuizText = (qIdx, evt) => {
+            const id = activeQuiz.value;
+            if (!quizState[id]) quizState[id] = {};
+            if (!quizState[id][qIdx]) quizState[id][qIdx] = {};
+            quizState[id][qIdx].userText = evt.target.value;
+          };
+          const isAnswered = (qIdx) => !!(quizState[activeQuiz.value] && quizState[activeQuiz.value][qIdx] && quizState[activeQuiz.value][qIdx].revealed);
+          const selectedOption = (qIdx) => quizState[activeQuiz.value] && quizState[activeQuiz.value][qIdx] && quizState[activeQuiz.value][qIdx].selected;
+          const userText = (qIdx) => (quizState[activeQuiz.value] && quizState[activeQuiz.value][qIdx] && quizState[activeQuiz.value][qIdx].userText) || '';
+          const quizProgress = (quizId) => {
+            const total = ((data.quizzes || []).find((q) => q.id === quizId) || {}).questions?.length || 0;
+            const answered = Object.values(quizState[quizId] || {}).filter((s) => s && s.revealed).length;
+            return { answered, total };
+          };
+
+          const flashcardNext = () => {
+            const fc = filteredFlashcards.value;
+            if (fc.length === 0) return;
+            flashcardFlipped.value = false;
+            flashcardIdx.value = (flashcardIdx.value + 1) % fc.length;
+          };
+          const flashcardPrev = () => {
+            const fc = filteredFlashcards.value;
+            if (fc.length === 0) return;
+            flashcardFlipped.value = false;
+            flashcardIdx.value = (flashcardIdx.value - 1 + fc.length) % fc.length;
+          };
+          const markFlashcard = (status) => {
+            const card = currentFlashcard.value;
+            if (!card) return;
+            const allIdx = (data.flashcards || []).indexOf(card);
+            if (allIdx >= 0) flashcardKnown[allIdx] = status === 'known';
+            flashcardNext();
+          };
+
+          return {
+            data, t, md, views, view, sidebarOpen,
+            activeModule, currentModule, tintForModule,
+            activeQuiz, currentQuiz,
+            quizState, handleQuizSelect, handleQuizReveal, handleQuizText, isAnswered, selectedOption, userText, quizProgress,
+            flashcardIdx, flashcardFlipped, flashcardKnown, flashcardFilter,
+            filteredFlashcards, currentFlashcard, flashcardNext, flashcardPrev, markFlashcard, knownCount,
+            glossarySearch, filteredGlossary,
+          };
+        },
+        template: `
+<div class="min-h-screen flex flex-col">
+  <header class="sticky top-0 z-30 bg-white border-b border-hairline h-16 flex items-center px-4 md:px-6">
+    <button @click="sidebarOpen = !sidebarOpen" class="md:hidden mr-2 p-2 -ml-2 rounded-btn hover:bg-surface-genie" :aria-label="t('menu')">
+      <svg class="w-5 h-5 text-charcoal" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+    <div class="flex items-center gap-3 min-w-0">
+      <div class="w-8 h-8 bg-purple-genie rounded-btn flex items-center justify-center shrink-0">
+        <span class="text-white font-bold text-sm">G</span>
+      </div>
+      <div class="min-w-0">
+        <h1 class="text-base font-semibold text-charcoal leading-tight truncate">{{ data.title_display }}</h1>
+        <p class="text-xs text-stone leading-tight">Genie Learning · {{ data.language }}</p>
+      </div>
+    </div>
+    <div class="ml-auto hidden sm:flex items-center gap-2">
+      <a v-if="data.repo_url" :href="data.repo_url" target="_blank" rel="noopener"
+         class="text-xs text-steel hover:text-charcoal underline decoration-hairline-strong underline-offset-2">{{ t('source_repo') }} ↗</a>
+    </div>
+  </header>
+
+  <div class="flex flex-1 min-h-0">
+    <aside :class="[
+        'bg-white border-r border-hairline w-[260px] shrink-0 sticky top-16 self-start h-[calc(100vh-4rem)] overflow-y-auto',
+        sidebarOpen ? 'fixed inset-0 top-16 z-20 block' : 'hidden md:block'
+      ]">
+      <nav class="p-3 space-y-1">
+        <button v-for="v in views" :key="v.id" @click="view = v.id; sidebarOpen = false"
+          class="w-full text-left px-3 py-2 rounded-btn text-sm font-medium transition"
+          :class="view === v.id ? 'bg-[#1a1a1a] text-white' : 'text-charcoal hover:bg-surface-genie'">
+          {{ v.label }}
+        </button>
+      </nav>
+      <div class="px-4 mt-4 text-[11px] text-stone leading-relaxed">
+        <p>{{ t('progress_hint') }}</p>
+      </div>
+    </aside>
+
+    <div v-if="sidebarOpen" @click="sidebarOpen = false" class="md:hidden fixed inset-0 top-16 bg-black/40 z-10"></div>
+
+    <main class="flex-1 min-w-0 bg-white">
+      <!-- OVERVIEW -->
+      <section v-if="view === 'overview'">
+        <div class="bg-navy-genie text-white relative overflow-hidden">
+          <div class="dot-grid"></div>
+          <div class="relative max-w-[820px] mx-auto px-6 md:px-12 py-16 md:py-24 text-center">
+            <div class="inline-flex items-center gap-2 mb-5 px-3 py-1 rounded-full bg-white/10 text-xs font-semibold uppercase tracking-wider">{{ t('hero_eyebrow') }}</div>
+            <h1 class="text-4xl md:text-6xl font-semibold leading-[1.05] tracking-tight mb-4">{{ data.title_display }}</h1>
+            <p class="text-base md:text-lg text-white/80 max-w-[640px] mx-auto leading-relaxed">{{ t('hero_subtitle') }}</p>
+            <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
+              <button @click="view = 'tutorial'" class="bg-purple-genie text-white px-5 py-2.5 rounded-btn font-medium text-sm hover:bg-purple-genie-pressed transition">{{ t('start_tutorial') }}</button>
+              <button @click="view = 'flashcards'" class="bg-white/0 border border-white/30 text-white px-5 py-2.5 rounded-btn font-medium text-sm hover:bg-white/10 transition">{{ t('flashcards') }}</button>
+            </div>
+          </div>
+        </div>
+        <div class="px-6 md:px-12 py-12 max-w-[820px] mx-auto">
+          <div class="prose-genie" v-html="md(data.overview.raw)"></div>
+        </div>
+      </section>
+
+      <!-- TUTORIAL -->
+      <section v-else-if="view === 'tutorial'" class="px-6 md:px-12 py-12 max-w-[820px] mx-auto">
+        <div v-if="data.tutorial" class="prose-genie" v-html="md(data.tutorial.raw)"></div>
+        <div v-else class="text-stone">{{ t('not_available') }}</div>
+      </section>
+
+      <!-- MODULES -->
+      <section v-else-if="view === 'modules'" class="px-6 md:px-12 py-12 max-w-[1100px] mx-auto">
+        <div v-if="!currentModule">
+          <h2 class="text-3xl font-semibold text-charcoal mb-2">{{ t('modules') }}</h2>
+          <p class="text-sm text-stone mb-8">{{ t('modules_subtitle') }}</p>
+          <div v-if="data.modules && data.modules.length" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <button v-for="(mod, idx) in data.modules" :key="mod.slug"
+              @click="activeModule = idx"
+              class="text-left p-6 rounded-card border border-hairline transition hover:shadow-mockup hover:-translate-y-0.5"
+              :class="'bg-tint-' + tintForModule(idx)">
+              <div class="text-xs font-semibold uppercase tracking-wider text-charcoal/60 mb-2">{{ String(idx + 1).padStart(2, '0') }}</div>
+              <h3 class="text-xl font-semibold text-charcoal mb-1">{{ mod.title_display || mod.name }}</h3>
+              <p class="text-sm text-charcoal/80 line-clamp-2">{{ mod.purpose || '' }}</p>
+            </button>
+          </div>
+          <div v-else class="text-stone">{{ t('not_available') }}</div>
+        </div>
+        <div v-else class="max-w-[820px] mx-auto">
+          <button @click="activeModule = -1" class="text-sm text-link-blue hover:underline mb-6">← {{ t('back_to_modules') }}</button>
+          <div class="prose-genie" v-html="md(currentModule.raw)"></div>
+        </div>
+      </section>
+
+      <!-- GLOSSARY -->
+      <section v-else-if="view === 'glossary'" class="px-6 md:px-12 py-12 max-w-[820px] mx-auto">
+        <h2 class="text-3xl font-semibold text-charcoal mb-2">{{ t('glossary') }}</h2>
+        <p class="text-sm text-stone mb-6">{{ t('glossary_subtitle') }}</p>
+        <input v-model="glossarySearch" type="search" :placeholder="t('search_terms')"
+          class="w-full mb-8 px-4 py-3 rounded-btn border border-hairline-strong focus:border-purple-genie focus:outline-none focus:ring-2 focus:ring-purple-genie/20 text-base" />
+        <div v-for="letter in filteredGlossary" :key="letter.letter" class="mb-8">
+          <h3 class="text-2xl font-semibold text-stone/80 mb-3">{{ letter.letter }}</h3>
+          <div class="space-y-3">
+            <div v-for="term in letter.terms" :key="term.term" class="p-4 rounded-card border border-hairline bg-white">
+              <div class="font-semibold text-charcoal text-base mb-1">{{ term.term }}</div>
+              <div class="text-sm text-slate prose-genie prose-mini" v-html="md(term.definition)"></div>
+            </div>
+          </div>
+        </div>
+        <div v-if="filteredGlossary.length === 0" class="text-stone text-center py-12">{{ t('no_results') }}</div>
+      </section>
+
+      <!-- QUIZZES -->
+      <section v-else-if="view === 'quizzes'" class="px-6 md:px-12 py-12 max-w-[900px] mx-auto">
+        <h2 class="text-3xl font-semibold text-charcoal mb-2">{{ t('quizzes') }}</h2>
+        <p class="text-sm text-stone mb-6">{{ t('quizzes_subtitle') }}</p>
+        <div v-if="data.quizzes && data.quizzes.length" class="flex flex-wrap gap-2 mb-8">
+          <button v-for="q in data.quizzes" :key="q.id" @click="activeQuiz = q.id"
+            class="px-4 py-2 rounded-full text-sm font-medium transition border"
+            :class="activeQuiz === q.id ? 'bg-[#1a1a1a] text-white border-[#1a1a1a]' : 'bg-white text-charcoal border-hairline hover:border-hairline-strong'">
+            {{ q.title }}
+            <span class="ml-2 text-xs opacity-70">{{ quizProgress(q.id).answered }}/{{ quizProgress(q.id).total }}</span>
+          </button>
+        </div>
+        <div v-if="currentQuiz">
+          <div v-for="(question, qIdx) in currentQuiz.questions" :key="qIdx"
+            class="mb-6 p-6 rounded-card border border-hairline bg-white">
+            <div class="flex items-baseline gap-3 mb-4">
+              <span class="text-2xl font-semibold text-purple-genie shrink-0">{{ qIdx + 1 }}</span>
+              <div class="flex-1 min-w-0">
+                <div class="text-[11px] font-semibold uppercase tracking-wider text-stone mb-1">
+                  <span v-if="question.kind === 'mc'">{{ t('mc_label') }}</span>
+                  <span v-else-if="question.kind === 'short'">{{ t('short_label') }}</span>
+                  <span v-else>{{ t('trace_label') }}</span>
+                </div>
+                <div class="prose-genie prose-mini text-charcoal" v-html="md(question.prompt)"></div>
+              </div>
+            </div>
+
+            <div v-if="question.kind === 'mc'" class="space-y-2 ml-0 sm:ml-12">
+              <button v-for="opt in question.options" :key="opt.key" @click="handleQuizSelect(qIdx, opt.key)"
+                class="w-full text-left px-4 py-3 rounded-btn border transition flex items-start gap-3"
+                :class="[
+                  !isAnswered(qIdx) ? 'border-hairline hover:border-purple-genie/50 bg-white cursor-pointer' : 'cursor-default',
+                  isAnswered(qIdx) && opt.key === question.answer_key ? 'border-success bg-success/10' : '',
+                  isAnswered(qIdx) && opt.key === selectedOption(qIdx) && opt.key !== question.answer_key ? 'border-error bg-error/10' : '',
+                  isAnswered(qIdx) && opt.key !== question.answer_key && opt.key !== selectedOption(qIdx) ? 'border-hairline opacity-60 bg-white' : ''
+                ]">
+                <span class="font-semibold text-charcoal w-5 shrink-0">{{ opt.key }}</span>
+                <span class="text-charcoal flex-1 prose-genie prose-mini" v-html="md(opt.text)"></span>
+                <span v-if="isAnswered(qIdx) && opt.key === question.answer_key" class="text-success font-semibold">✓</span>
+                <span v-if="isAnswered(qIdx) && opt.key === selectedOption(qIdx) && opt.key !== question.answer_key" class="text-error font-semibold">✗</span>
+              </button>
+              <div v-if="isAnswered(qIdx)" class="mt-3 p-4 rounded-btn bg-tint-cream border border-hairline">
+                <div class="text-[11px] font-semibold uppercase tracking-wider text-stone mb-1">{{ t('explanation') }}</div>
+                <div class="text-sm text-charcoal prose-genie prose-mini" v-html="md(question.explanation || '')"></div>
+              </div>
+            </div>
+
+            <div v-else class="ml-0 sm:ml-12">
+              <textarea :value="userText(qIdx)" @input="handleQuizText(qIdx, $event)"
+                :placeholder="t('your_answer')" rows="4"
+                class="w-full px-4 py-3 rounded-btn border border-hairline-strong focus:border-purple-genie focus:outline-none focus:ring-2 focus:ring-purple-genie/20 text-sm font-mono"
+                :disabled="isAnswered(qIdx)"></textarea>
+              <div class="mt-3">
+                <button v-if="!isAnswered(qIdx)" @click="handleQuizReveal(qIdx)"
+                  class="px-4 py-2 rounded-btn bg-purple-genie text-white text-sm font-medium hover:bg-purple-genie-pressed">
+                  {{ t('reveal_answer') }}
+                </button>
+              </div>
+              <div v-if="isAnswered(qIdx)" class="mt-4 p-4 rounded-btn bg-tint-mint border border-hairline">
+                <div class="text-[11px] font-semibold uppercase tracking-wider text-stone mb-1">{{ t('reference_answer') }}</div>
+                <div class="text-sm text-charcoal prose-genie prose-mini" v-html="md(question.answer || '')"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div v-else class="text-stone">{{ t('select_quiz') }}</div>
+      </section>
+
+      <!-- FLASHCARDS -->
+      <section v-else-if="view === 'flashcards'" class="px-6 md:px-12 py-12 max-w-[700px] mx-auto">
+        <div class="flex items-center justify-between mb-2 gap-3 flex-wrap">
+          <h2 class="text-3xl font-semibold text-charcoal">{{ t('flashcards') }}</h2>
+          <div class="text-sm text-stone">{{ knownCount }} / {{ data.flashcards?.length || 0 }} {{ t('known_marker') }}</div>
+        </div>
+        <p class="text-sm text-stone mb-6">{{ t('flashcards_subtitle') }}</p>
+        <div class="flex gap-2 mb-6">
+          <button @click="flashcardFilter = 'all'; flashcardIdx = 0; flashcardFlipped = false"
+            class="px-3 py-1.5 rounded-full text-sm font-medium border transition"
+            :class="flashcardFilter === 'all' ? 'bg-[#1a1a1a] text-white border-[#1a1a1a]' : 'bg-white text-charcoal border-hairline hover:border-hairline-strong'">
+            {{ t('show_all') }}
+          </button>
+          <button @click="flashcardFilter = 'unknown'; flashcardIdx = 0; flashcardFlipped = false"
+            class="px-3 py-1.5 rounded-full text-sm font-medium border transition"
+            :class="flashcardFilter === 'unknown' ? 'bg-[#1a1a1a] text-white border-[#1a1a1a]' : 'bg-white text-charcoal border-hairline hover:border-hairline-strong'">
+            {{ t('show_only_unknown') }}
+          </button>
+        </div>
+
+        <div v-if="!currentFlashcard" class="text-center text-stone py-20 rounded-card border border-hairline bg-surface-genie">{{ t('no_flashcards') }}</div>
+        <div v-else>
+          <div class="text-[11px] font-semibold uppercase tracking-wider text-stone mb-2 text-center">
+            {{ flashcardIdx + 1 }} / {{ filteredFlashcards.length }}
+          </div>
+          <div class="flip-card cursor-pointer mb-6 select-none" :class="{ flipped: flashcardFlipped }" @click="flashcardFlipped = !flashcardFlipped" style="height: 340px">
+            <div class="flip-card-inner">
+              <div class="flip-face absolute inset-0 p-8 rounded-card border border-hairline bg-white flex items-center justify-center text-center shadow-mockup">
+                <div class="max-w-full">
+                  <div class="text-[11px] font-semibold uppercase tracking-wider text-stone mb-3">{{ currentFlashcard.source === 'glossary' ? t('term_label') : t('question_label') }}</div>
+                  <div class="text-2xl font-semibold text-charcoal prose-genie prose-mini" v-html="md(currentFlashcard.front)"></div>
+                  <div class="text-xs text-stone mt-6">{{ t('click_to_flip') }}</div>
+                </div>
+              </div>
+              <div class="flip-face flip-face-back absolute inset-0 p-6 rounded-card border-2 border-purple-genie bg-tint-lavender flex items-center justify-center text-center shadow-mockup overflow-y-auto">
+                <div class="prose-genie prose-mini text-charcoal text-left w-full" v-html="md(currentFlashcard.back)"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex justify-between items-center gap-2 flex-wrap">
+            <button @click="flashcardPrev" class="px-4 py-2 rounded-btn border border-hairline-strong text-charcoal text-sm font-medium hover:bg-surface-genie">← {{ t('previous') }}</button>
+            <div class="flex gap-2">
+              <button @click="markFlashcard('unknown')" class="px-4 py-2 rounded-btn border border-hairline-strong text-charcoal text-sm font-medium hover:bg-surface-genie">{{ t('didnt_know') }}</button>
+              <button @click="markFlashcard('known')" class="px-4 py-2 rounded-btn bg-success text-white text-sm font-medium hover:opacity-90">{{ t('knew_it') }}</button>
+            </div>
+            <button @click="flashcardNext" class="px-4 py-2 rounded-btn border border-hairline-strong text-charcoal text-sm font-medium hover:bg-surface-genie">{{ t('next') }} →</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PODCAST -->
+      <section v-else-if="view === 'podcast'" class="px-6 md:px-12 py-12 max-w-[820px] mx-auto">
+        <h2 class="text-3xl font-semibold text-charcoal mb-2">{{ t('podcast') }}</h2>
+        <p class="text-sm text-stone mb-6">{{ t('podcast_subtitle') }}</p>
+        <div v-if="data.podcast?.audio_file" class="mb-8 p-6 rounded-card bg-tint-lavender border border-hairline">
+          <div class="text-[11px] font-semibold uppercase tracking-wider text-charcoal/70 mb-3">{{ t('listen_label') }}</div>
+          <audio :src="data.podcast.audio_file" controls preload="metadata" class="w-full"></audio>
+        </div>
+        <div v-else class="mb-8 p-6 rounded-card bg-tint-yellow border border-hairline">
+          <div class="text-sm font-semibold text-charcoal mb-2">{{ t('audio_coming_soon') }}</div>
+          <p class="text-xs text-charcoal/70 mb-3">{{ t('audio_hint') }}</p>
+          <code class="text-xs bg-white/60 px-2 py-1 rounded block w-fit">python scripts/gemini_podcast.py content/{{ data.owner_name }}/</code>
+        </div>
+        <div v-if="data.podcast?.script_raw" class="prose-genie" v-html="md(data.podcast.script_raw)"></div>
+      </section>
+    </main>
+  </div>
+
+  <footer class="border-t border-hairline px-6 py-6 text-center text-xs text-stone">
+    {{ t('footer_built') }}
+    <a href="https://github.com/anthropics/claude-code" target="_blank" rel="noopener" class="text-link-blue underline">Genie Learning</a>.
+  </footer>
+</div>
+        `,
+      });
+      app.mount('#app');
+    })();
+  </script>
+</body>
+</html>
