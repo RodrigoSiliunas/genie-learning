@@ -38,6 +38,7 @@ The orchestrator also runs a read-only post-run audit in chat after `90-validati
 - **`.claude/agents/quiz-generator.md`** — writes quizzes from generated course materials.
 - **`.claude/agents/podcast-scriptwriter.md`** — writes podcast script and metadata without calling external APIs.
 - **`.claude/agents/course-validator.md`** — validates the final generated package and writes `90-validation.md`.
+- **`.claude/agents/course-remediator.md`** — applies automatic, allow-listed fixes to validator findings (clone-path leak, generation-footer leak, English structural headings on non-English courses, tolerance bands on numeric short-answer questions, missing target-language glosses on coined glossary terms, low-confidence path-range fixes, broken-link typos). Idempotent; runs between `course-validator` and `post-run-course-auditor`. Updates `90-validation.md` in place and writes `91-remediation.md`.
 - **`.claude/agents/post-run-course-auditor.md`** — performs the final read-only post-run audit and returns a chat report without writing files.
 - **`.claude/skills/genie-render/SKILL.md`** — orchestrator for the HTML renderer. Invokes `scripts/render_course.py`.
 - **`scripts/render_course.py`** — deterministic Python renderer (stdlib only). Reads `content/<owner>-<name>/`, parses quizzes/glossary/modules, derives flashcards from glossary + multiple-choice questions, and writes `content/<owner>-<name>/index.html`.
@@ -64,12 +65,13 @@ The orchestrator also runs a read-only post-run audit in chat after `90-validati
   - `quiz-generator`: Produces quizzes grounded in generated course content
   - `podcast-scriptwriter`: Produces podcast text assets (`script.md` + `metadata.json`) consumed by `scripts/gemini_podcast.py` to generate audio
   - `course-validator`: Performs final artifact, structure, link, language, and safety checks
-  - `post-run-course-auditor`: Performs read-only post-run artifact audit after `course-validator`
+  - `course-remediator`: Resolves deterministic and gated contextual findings from `course-validator` automatically before the post-run audit; updates `90-validation.md` in place and writes `91-remediation.md`
+  - `post-run-course-auditor`: Performs read-only post-run artifact audit after `course-remediator`
 - **Orchestrator**: `genie-learn` skill — coordinator that receives arguments, invokes subagents sequentially and in parallel, and summarizes results
 - **Tools**: Bash (cartographer only), Read, Glob, Grep, Write — each agent has minimum necessary permissions
 - **Memory**: Filesystem as contract — cartographer returns JSON, agents read/write files under `content/<owner>-<name>/`
 - **State**: `repos/` (clones) and `content/` (generated artifacts) directories — both gitignored
-- **Input/Output**: GitHub URL + [language] + [max-workers] → structured Markdown course (`00-overview.md`, `10-tutorial.md`, `20-glossary.md`, `30-modules/*.md`, `40-quizzes/*.md`, `90-validation.md`, `99-podcast/script.md`, `99-podcast/metadata.json`)
+- **Input/Output**: GitHub URL + [language] + [max-workers] → structured Markdown course (`00-overview.md`, `10-tutorial.md`, `20-glossary.md`, `30-modules/*.md`, `40-quizzes/*.md`, `90-validation.md`, `91-remediation.md`, `99-podcast/script.md`, `99-podcast/metadata.json`)
 - **Observability**: Final summary to user with elapsed time, generated files, workers used, and post-run audit status
 - **Evaluation/Tests**: `course-validator` provides generated-course validation for required artifacts, module lessons, quizzes, podcast metadata, language signals, and secret leakage; `post-run-course-auditor` adds a read-only post-run audit in chat; no automated repository test suite is present yet
 
@@ -83,10 +85,11 @@ The orchestrator also runs a read-only post-run audit in chat after `90-validati
    - Step 2 (parallel/sequential fallback): Simultaneous dispatch of `tutorial-writer`, `jargon-extractor`, and N instances of `module-teacher` when `max_workers >= 3`; tutorial/glossary first, then one module at a time when `max_workers=2`
    - Step 3 (parallel): Dispatches `quiz-generator` and `podcast-scriptwriter` after primary content exists
    - Step 4 (sequential): Runs `course-validator` after generated content exists
-   - Step 5 (sequential): Runs `post-run-course-auditor` read-only after `course-validator`
+   - Step 4.5 (sequential): Runs `course-remediator` to auto-resolve allow-listed findings; updates `90-validation.md` and writes `91-remediation.md`
+   - Step 5 (sequential): Runs `post-run-course-auditor` read-only after `course-remediator`
 5. **Coordination by orchestrator**: Parses JSON inventory from cartographer, dispatches agents in parallel when possible, and manages module batches without allowing `max_workers - 2` to skip modules
 6. **Final response/action**: Summary to user with generated files, time, workers used, post-run audit status, and a one-line note pointing to `scripts/gemini_podcast.py` for podcast audio generation
-7. **Persistence/logs**: Files written to `content/<owner>-<name>/`, clones in `repos/`; `.env` remains local-only
+7. **Persistence/logs**: Files written to `content/<owner>-<name>/` (including `91-remediation.md` when remediation runs), clones in `repos/`; `.env` remains local-only
 
 ## Strengths Found
 
@@ -97,6 +100,7 @@ The orchestrator also runs a read-only post-run audit in chat after `90-validati
 - **Filesystem contract**: No IPC, no mailbox, no daemon — simple and robust
 - **Isolated context**: Each subagent has its own context window, keeping orchestrator lean
 - **Final validation**: Dedicated validator creates a reviewable quality report after generation, including required artifacts, module lessons, quizzes, podcast script metadata, language, and safety signals
+- **Self-healing course**: `course-remediator` automatically resolves recurring findings (clone-path leak, generation-footer leak, English structural headings on non-English courses, missing tolerance bands, and missing target-language glosses) before the post-run audit, so the user doesn't have to fix the same class of issue twice
 - **Modular podcast pipeline**: `podcast-scriptwriter` handles text only; `scripts/gemini_podcast.py` handles audio TTS only; `/genie-render` auto-triggers the TTS step when `GEMINI_API_KEY` is set in `.env`
 
 ## Risks or Bottlenecks

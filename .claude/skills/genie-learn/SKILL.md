@@ -6,7 +6,7 @@ allowed-tools: Bash(mkdir:*), Bash(test:*), Read, Glob, Write
 
 # Genie Learn — Orchestrator
 
-You are running the `genie-learn` skill. The user has invoked you with arguments. Your job is to coordinate eight subagents (`repo-cartographer`, `module-teacher`, `tutorial-writer`, `jargon-extractor`, `quiz-generator`, `podcast-scriptwriter`, `course-validator`, `post-run-course-auditor`) to produce and audit a complete educational package for a GitHub repository.
+You are running the `genie-learn` skill. The user has invoked you with arguments. Your job is to coordinate nine subagents (`repo-cartographer`, `module-teacher`, `tutorial-writer`, `jargon-extractor`, `quiz-generator`, `podcast-scriptwriter`, `course-validator`, `course-remediator`, `post-run-course-auditor`) to produce, remediate, and audit a complete educational package for a GitHub repository.
 
 Subagent dispatch follows Claude Code's standard subagent mechanism: explicitly name or @-mention the project subagent for each task. No separate `Agent` entry is required in this skill's `allowed-tools`; the runtime resolves project subagents from `.claude/agents/`.
 
@@ -71,9 +71,21 @@ After enrichment generation returns, invoke **one** `course-validator` with: `co
 
 The validator runs last because it checks the final package, including quizzes and podcast script when present.
 
+## Step 4.5 — Automatic remediation
+
+After `course-validator` returns and `content_path/90-validation.md` exists, invoke **one** `course-remediator` with: `content_path`, `owner_name`, `language`, `output_log_path = content_path/91-remediation.md`.
+
+Pass it a prompt like:
+
+> Apply automatic remediation to the Genie Learning course at `<content_path>` (language `<language>`). Read warnings and infos in `<content_path>/90-validation.md`, classify each against your allow-list, apply only the gated fixes, update `90-validation.md` in place to mark resolved findings (do not delete them), and write a remediation log to `<output_log_path>`. Do not regenerate content, do not translate prose in bulk, and do not invent values the validator did not provide.
+
+This step is short — the agent typically applies between 0 and 5 small edits. If it reports `0 applied / 0 skipped`, treat that as success.
+
+If `course-remediator` fails, do not retry, do not block the auditor, do not mutate artifacts further. Note the failure in the final summary and continue to Step 5. The audit in Step 5 will then run against the unremediated state — which is acceptable.
+
 ## Step 5 — Post-run external audit
 
-After `course-validator` returns, invoke **one** `post-run-course-auditor` with: `content_path`, `owner_name`, `language`, `repo_url`, `repo_path`, `modules`, `command_used = /genie-learn <repo_url> <language> <max_workers>`, and `test_goal = automatic post-run audit after genie-learn`.
+After `course-remediator` returns (or fails), invoke **one** `post-run-course-auditor` with: `content_path`, `owner_name`, `language`, `repo_url`, `repo_path`, `modules`, `command_used = /genie-learn <repo_url> <language> <max_workers>`, and `test_goal = automatic post-run audit after genie-learn`.
 
 The auditor runs after the internal validator and returns a Markdown report in chat. It is read-only: it must not write files, alter `content/`, alter `repos/`, execute repository code, call Gemini, or print secrets.
 
@@ -95,9 +107,11 @@ When all subagents have returned, output a summary to the user containing:
   - `content/<owner_name>/30-modules/*.md` (count)
   - `content/<owner_name>/40-quizzes/*.md` (count)
   - `content/<owner_name>/90-validation.md`
+  - `content/<owner_name>/91-remediation.md`
   - `content/<owner_name>/99-podcast/script.md`
   - `content/<owner_name>/99-podcast/metadata.json`
 - Number of `module-teacher` workers used and how many modules remain unprocessed (if you batched, mention it).
+- Automatic remediation summary from `course-remediator`: `<N>` findings resolved, `<M>` skipped (out-of-scope or false-positive), `<K>` already clean. Point to `content/<owner_name>/91-remediation.md` for details.
 - Post-run audit status from `post-run-course-auditor`, including the final verdict and any main `BLOCKER` or `WARNING` findings.
 - One-line note: **"Podcast audio generation is handled by `scripts/gemini_podcast.py` and is auto-invoked by `/genie-render` when `GEMINI_API_KEY` is set."**
 
@@ -109,6 +123,7 @@ Do **not** read back the generated content to the user — they can open the fil
 - If the user passes a private/non-existent repo and clone fails, the cartographer will return an empty modules list — produce only the overview stub and validation report when possible, then give a clear failure note.
 - If `max_workers < 3`, you cannot dispatch `tutorial-writer` + `jargon-extractor` + ≥1 `module-teacher` in parallel — fall back to sequential dispatch in that case.
 - If primary content is incomplete, still run `quiz-generator`, `podcast-scriptwriter`, and `course-validator` only when they can produce useful partial artifacts from existing files. The validator should record missing artifacts.
+- If `course-remediator` fails, the validation report stays unchanged and the post-run auditor still runs. Note the remediation failure in the final summary.
 - If `post-run-course-auditor` fails, report the failure and show the manual `/validate-genie-learning-course` fallback command; do not mutate or regenerate artifacts.
 - Never print environment variable values, API keys, or secrets in summaries.
 
@@ -117,5 +132,6 @@ Do **not** read back the generated content to the user — they can open the fil
 - Do not clone the repo yourself; the cartographer owns that.
 - Do not read or summarize the cloned code yourself; that's what the subagents are for. You are pure coordination.
 - Do not perform the post-run audit yourself; invoke `post-run-course-auditor`.
+- Do not perform remediation yourself; invoke `course-remediator`.
 - Do not invoke subagents serially when they could go in parallel — the value of this skill is concurrency.
 - Do not call Gemini or any external API from the skill or subagents; podcast audio generation belongs to `scripts/gemini_podcast.py`.
