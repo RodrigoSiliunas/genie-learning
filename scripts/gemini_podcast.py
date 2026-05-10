@@ -299,13 +299,30 @@ def main(argv: list[str]) -> int:
 
     print(f"[gemini] {len(turns)} turns | model={model} | language={language} | voices=Kore+Puck")
     print("[gemini] calling Gemini TTS API (30s-5min depending on script length)...")
-    pcm_bytes, mime = call_gemini_tts(api_key, model, prompt)
+
+    try:
+        pcm_bytes, mime = call_gemini_tts(api_key, model, prompt)
+    except KeyboardInterrupt:
+        print("\n[gemini] interrupted by user.", file=sys.stderr)
+        return 130
 
     # Wrap and write WAV.
     sample_rate = parse_sample_rate(mime)
     wav_bytes = make_wav(pcm_bytes, sample_rate=sample_rate, channels=1, bits_per_sample=16)
     output_path = podcast_dir / "podcast.wav"
-    output_path.write_bytes(wav_bytes)
+
+    try:
+        output_path.write_bytes(wav_bytes)
+    except KeyboardInterrupt:
+        # If the user hits Ctrl+C during the (usually atomic) write, try to
+        # remove a potentially partial file so the next run doesn't think the
+        # audio is complete.
+        print("\n[gemini] interrupted during write; cleaning up partial file.", file=sys.stderr)
+        try:
+            output_path.unlink(missing_ok=True)
+        except OSError:
+            pass
+        return 130
 
     # Summary.
     size_mb = len(wav_bytes) / (1024 * 1024)
