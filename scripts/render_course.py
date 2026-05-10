@@ -512,6 +512,7 @@ def build_course_data(content_dir: Path, owner_name: str) -> dict[str, Any]:
     metadata = load_podcast_metadata(podcast_dir) or {}
     language = metadata.get("language") or "pt-BR"
     chrome = CHROME_STRINGS.get(language) or CHROME_STRINGS["en"]
+    repo_url = metadata.get("repo_url") if isinstance(metadata.get("repo_url"), str) else None
 
     overview_raw = read_text(content_dir / "00-overview.md")
     if overview_raw is None:
