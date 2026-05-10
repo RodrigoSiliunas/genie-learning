@@ -571,12 +571,14 @@ def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(description="Render a Genie Learning course as a single HTML file.")
     parser.add_argument("owner_name", help="Course directory name under content/ (e.g. expressjs-express).")
     parser.add_argument("--project-root", default=None, help="Project root (default: parent of scripts/).")
+    parser.add_argument("--output-dir", default=None, help="Directory to write index.html into (default: content/<owner_name>/).")
     args = parser.parse_args(argv)
 
     project_root = Path(args.project_root) if args.project_root else Path(__file__).resolve().parent.parent
     content_dir = project_root / "content" / args.owner_name
     template_path = project_root / "scripts" / "templates" / "course.html"
-    output_path = content_dir / "index.html"
+    output_path = (Path(args.output_dir) if args.output_dir else content_dir) / "index.html"
+    output_path.parent.mkdir(parents=True, exist_ok=True)
 
     if not content_dir.is_dir():
         print(f"error: course directory not found: {content_dir}", file=sys.stderr)
