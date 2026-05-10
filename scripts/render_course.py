@@ -571,6 +571,7 @@ def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(description="Render a Genie Learning course as a single HTML file.")
     parser.add_argument("owner_name", help="Course directory name under content/ (e.g. expressjs-express).")
     parser.add_argument("--project-root", default=None, help="Project root (default: parent of scripts/).")
+    parser.add_argument("--check", action="store_true", help="Validate the course without writing HTML.")
     args = parser.parse_args(argv)
 
     project_root = Path(args.project_root) if args.project_root else Path(__file__).resolve().parent.parent
@@ -587,6 +588,17 @@ def main(argv: list[str]) -> int:
         return 2
 
     course_data = build_course_data(content_dir, args.owner_name)
+
+    if args.check:
+        n_modules = len(course_data["modules"])
+        n_quizzes = len(course_data["quizzes"])
+        n_cards = len(course_data["flashcards"])
+        n_terms = sum(len(letter["terms"]) for letter in course_data["glossary"])
+        audio_status = "yes" if course_data["podcast"]["audio_file"] else "no"
+        print(f"check: course '{args.owner_name}' is valid")
+        print(f"Modules: {n_modules} | Quizzes: {n_quizzes} | Glossary terms: {n_terms} | Flashcards: {n_cards} | Audio: {audio_status}")
+        return 0
+
     render(template_path, course_data, output_path)
 
     size_kb = output_path.stat().st_size / 1024
