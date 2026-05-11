@@ -235,6 +235,7 @@
               <div class="mt-auto pt-4 border-t" style="border-color: color-mix(in oklab, var(--tint-ink, var(--ink)) 12%, transparent);">
                 <div class="flex items-center justify-between text-[12.5px]">
                   <span class="smallcaps" style="color: color-mix(in oklab, var(--tint-ink, var(--ink)) 70%, transparent);">{{ m.name }}</span>
+                  <span class="text-[11px] font-mono" style="color: color-mix(in oklab, var(--tint-ink, var(--ink)) 50%, transparent);">{{ readTime(m.raw) }}</span>
                   <svg class="icon transition-transform group-hover:translate-x-0.5" width="16" height="16" viewBox="0 0 24 24" :style="{stroke: 'var(--tint-ink, var(--ink))'}"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
                 </div>
               </div>
@@ -250,6 +251,9 @@
           </button>
           <div class="eyebrow mb-2">{{ t('modules') }} · {{ String(activeModuleIndex+1).padStart(2,'0') }}</div>
           <h2 class="display-serif text-[40px] sm:text-[52px] leading-[1.02] mb-4 max-w-[20ch]">{{ activeModule.title_display }}</h2>
+          <div class="flex items-center gap-4 text-[13px] text-[var(--muted)] mb-8">
+            <span class="font-mono text-[11px]">{{ readTime(activeModule.raw) }} read</span>
+          </div>
           <p class="text-[16px] text-[var(--muted)] max-w-[60ch] mb-8 leading-relaxed">{{ activeModule.purpose }}</p>
           <article class="prose-genie max-w-[68ch]" v-html="renderMd(activeModule.raw)"></article>
 
@@ -322,6 +326,7 @@
                   :class="activeQuizId === q.id ? 'bg-[var(--ink)] text-[var(--paper)] border-[var(--ink)]' : 'hairline text-[var(--muted)] hover:text-[var(--ink)] hover:border-[var(--ink)]'">
             <span class="font-medium">{{ q.title }}</span>
             <span class="font-mono text-[11px] opacity-70">{{ quizProgress(q).answered }}/{{ q.questions.length }}</span>
+            <span v-if="quizProgress(q).trace" class="font-mono text-[10px] opacity-50">(+{{ quizProgress(q).trace }} auto)</span>
           </button>
         </div>
 
@@ -399,15 +404,21 @@
           <h2 class="display-serif text-[40px] sm:text-[56px] leading-none mb-3"><em>Recall</em>, repeat<em class="text-[var(--accent)]">.</em></h2>
           <p class="text-[15px] text-[var(--muted)] max-w-[55ch]">{{ t('flashcards_subtitle') }}</p>
         </header>
-          <div class="flex flex-wrap items-center justify-between gap-4 mb-7">
+
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-7">
           <div class="flex flex-wrap gap-3">
             <div class="seg">
               <button @click="flashFilter = 'all'" :class="{'is-active': flashFilter === 'all'}">{{ t('show_all') }}</button>
               <button @click="flashFilter = 'unknown'" :class="{'is-active': flashFilter === 'unknown'}">{{ t('show_only_unknown') }}</button>
             </div>
             <div class="seg">
-              <button @click="shuffleFlashcards" :class="{'is-active': flashOrder !== null}">Shuffle</button>
-              <button v-if="flashOrder !== null" @click="resetOrder" class="text-[var(--muted)] hover:text-[var(--ink)]">Reset</button>
+              <button @click="flashSourceFilter = 'all'" :class="{'is-active': flashSourceFilter === 'all'}">{{ t('show_all') }}</button>
+              <button @click="flashSourceFilter = 'glossary'" :class="{'is-active': flashSourceFilter === 'glossary'}">{{ t('term_label') }}</button>
+              <button @click="flashSourceFilter = 'quiz'" :class="{'is-active': flashSourceFilter === 'quiz'}">{{ t('question_label') }}</button>
+            </div>
+            <div class="seg">
+              <button @click="shuffleFlashcards" :class="{'is-active': flashOrder !== null}">{{ t('shuffle') }}</button>
+              <button v-if="flashOrder !== null" @click="resetOrder" class="text-[var(--muted)] hover:text-[var(--ink)]">{{ t('reset') }}</button>
             </div>
           </div>
           <div class="font-mono text-[12px] text-[var(--muted)]">
@@ -512,7 +523,11 @@
         {{ t('footer_built') }}
         <a href="#" class="text-[var(--ink)] hover:text-[var(--accent)] underline decoration-[var(--hairline-2)] underline-offset-2">Genie Learning</a>
       </div>
-      <div class="font-mono">{{ data.owner_name }} · v{{ data.schema_version }}</div>
+      <div class="flex items-center gap-4">
+        <button @click="exportProgress" class="hover:text-[var(--ink)] underline decoration-[var(--hairline-2)] underline-offset-2">Export progress</button>
+        <button @click="importProgress" class="hover:text-[var(--ink)] underline decoration-[var(--hairline-2)] underline-offset-2">Import progress</button>
+        <span class="font-mono">{{ data.owner_name }} · v{{ data.schema_version }}</span>
+      </div>
     </div>
   </footer>
 

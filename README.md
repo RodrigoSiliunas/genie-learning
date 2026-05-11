@@ -59,6 +59,18 @@ Lessons are written in the language you choose (`pt-BR`, `en`, `es`, …).
 
    This produces `content/sindresorhus-is-plain-obj/index.html` (open via `file://` in any browser). The page is self-contained: Vue 3, Tailwind, and marked.js load from CDN at first open. If `GEMINI_API_KEY` is set in `.env`, the skill first invokes `scripts/gemini_podcast.py` to generate `99-podcast/podcast.wav` (idempotent — skips if the file already exists), then renders the HTML so the player appears in the Podcast view. Re-running overwrites the HTML without touching the learner's progress (saved in their browser's `localStorage`).
 
+   The underlying render script also supports these CLI flags:
+
+   ```text
+   python scripts/render_course.py <owner-name> [--check] [--quiet] [--list-courses] [--version] [--output-dir <dir>]
+   ```
+
+   - `--check` — validate the course structure without writing files.
+   - `--quiet` — suppress informational stdout (errors still go to stderr).
+   - `--list-courses` — list all available courses in `content/`.
+   - `--version` — print version and exit.
+   - `--output-dir <dir>` — write `index.html` and `assets/` to a custom directory instead of `content/<owner-name>/`.
+
 ### Arguments
 
 ```text

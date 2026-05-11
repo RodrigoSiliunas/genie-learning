@@ -31,6 +31,7 @@ const app = createApp({
 
     const flashIndex = ref(persisted.flashIndex || 0);
     const flashFilter = ref(persisted.flashFilter || 'all');
+    const flashSourceFilter = ref(persisted.flashSourceFilter || 'all');
     const flipped = ref(false);
     const knownMap = ref(persisted.knownMap || {});           // { 'front-hash': true }
 
@@ -91,6 +92,13 @@ const app = createApp({
       } catch { return data.value.repo_url; }
     });
 
+    const readTime = (md) => {
+      if (!md) return '';
+      const words = md.trim().split(/\s+/).length;
+      const min = Math.max(1, Math.round(words / 200));
+      return `${min} min`;
+    };
+
     const glossaryCount = computed(() =>
       data.value.glossary.reduce((acc, g) => acc + g.terms.length, 0)
     );
@@ -126,8 +134,18 @@ const app = createApp({
     const shortKey = (qid, qi) => `${qid}:${qi}`;
     const quizAnswered = (qid, qi) => !!(mcAnswers.value[qid] && mcAnswers.value[qid][qi]);
 
+    const scrollToQuestion = (qi) => {
+      // Scroll the answered question card into view after a brief delay for Vue re-render
+      setTimeout(() => {
+        const cards = document.querySelectorAll('.view-enter .card');
+        const target = cards[qi];
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 50);
+    };
+
     const quizProgress = (q) => {
       let answered = 0;
+      let trace = 0;
       q.questions.forEach((qq, qi) => {
         if (qq.kind === 'mc') {
           if (mcAnswers.value[q.id] && mcAnswers.value[q.id][qi]) answered++;
@@ -135,19 +153,22 @@ const app = createApp({
           if (shortRevealed.value[shortKey(q.id, qi)]) answered++;
         } else {
           answered++; // trace always "answered"
+          trace++;
         }
       });
-      return { answered };
+      return { answered, trace, total: q.questions.length };
     };
 
     const answerMc = (qid, qi, key) => {
       if (!mcAnswers.value[qid]) mcAnswers.value[qid] = {};
       if (mcAnswers.value[qid][qi]) return;
       mcAnswers.value[qid] = { ...mcAnswers.value[qid], [qi]: key };
+      scrollToQuestion(qi);
     };
 
     const revealShort = (qid, qi) => {
       shortRevealed.value = { ...shortRevealed.value, [shortKey(qid, qi)]: true };
+      scrollToQuestion(qi);
     };
 
     const optionClass = (qid, qi, q, opt) => {
@@ -174,10 +195,15 @@ const app = createApp({
 
     const visibleFlashcards = computed(() => {
       let cards = data.value.flashcards;
+      // Known/unknown filter
       if (flashFilter.value === 'unknown') {
         cards = cards.filter(f => !knownMap.value[flashHash(f)]);
       }
-      // Apply shuffled order if active
+      // Source filter
+      if (flashSourceFilter.value !== 'all') {
+        cards = cards.filter(f => f.source === flashSourceFilter.value);
+      }
+      // Apply shuffled order if active and consistent with current filter length
       if (flashOrder.value && flashOrder.value.length === cards.length) {
         cards = flashOrder.value.map(i => cards[i]);
       }
@@ -347,6 +373,58 @@ Avalie:`;
       }
     };
 
+    /* ---------- Export/import progress ---------- */
+    const exportProgress = () => {
+      const state = loadState();
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${STORAGE_KEY}-progress.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    const importProgress = () => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+      input.onchange = () => {
+        const file = input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const state = JSON.parse(e.target.result);
+            saveState(state);
+            // Reload current session state from the imported data
+            const reloaded = loadState();
+            if (reloaded.view) view.value = reloaded.view;
+            if (reloaded.theme) theme.value = reloaded.theme;
+            if (reloaded.accent) accent.value = reloaded.accent;
+            if (reloaded.activeQuizId) activeQuizId.value = reloaded.activeQuizId;
+            if (reloaded.mcAnswers) mcAnswers.value = reloaded.mcAnswers;
+            if (reloaded.shortAnswers) shortAnswers.value = reloaded.shortAnswers;
+            if (reloaded.shortRevealed) shortRevealed.value = reloaded.shortRevealed;
+            if (reloaded.flashIndex != null) flashIndex.value = reloaded.flashIndex;
+            if (reloaded.flashFilter) flashFilter.value = reloaded.flashFilter;
+            if (reloaded.knownMap) knownMap.value = reloaded.knownMap;
+            if (reloaded.grading) grading.value = reloaded.grading;
+            // Flash a brief confirmation
+            const banner = document.createElement('div');
+            banner.textContent = '✓ Progresso importado com sucesso';
+            banner.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--accent);color:var(--accent-ink);padding:12px 24px;border-radius:12px;font-size:14px;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.15);transition:opacity 0.3s';
+            document.body.appendChild(banner);
+            setTimeout(() => { banner.style.opacity = '0'; setTimeout(() => banner.remove(), 300); }, 2000);
+          } catch {
+            alert('Falha ao importar progresso: arquivo JSON inválido.');
+          }
+        };
+        reader.readAsText(file);
+      };
+      input.click();
+    };
+
     /* ---------- Apply tweaks to <html> ---------- */
     const applyTweaks = () => {
       const root = document.documentElement;
@@ -366,6 +444,7 @@ Avalie:`;
         shortRevealed: shortRevealed.value,
         flashIndex: flashIndex.value,
         flashFilter: flashFilter.value,
+        flashSourceFilter: flashSourceFilter.value,
         flashOrder: flashOrder.value,
         knownMap: knownMap.value,
         grading: grading.value
@@ -376,7 +455,15 @@ Avalie:`;
            mcAnswers, shortAnswers, shortRevealed, knownMap, grading], () => { persist(); }, { deep: true });
     watch([theme, accent], applyTweaks, { immediate: true });
     watch(flashFilter, () => { flashIndex.value = 0; flipped.value = false; });
+    watch(flashSourceFilter, () => { flashIndex.value = 0; flipped.value = false; });
     watch(view, () => { flipped.value = false; });
+    watch(activeQuizId, () => {
+      // Scroll to the quiz section on quiz switch
+      setTimeout(() => {
+        const el = document.querySelector('.view-enter');
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 50);
+    });
 
     onMounted(() => {
       applyTweaks();
@@ -392,6 +479,18 @@ Avalie:`;
           if (e.key === 'ArrowRight') nextFlash();
           if (e.key === 'ArrowLeft') prevFlash();
           if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flipped.value = !flipped.value; }
+          if (e.key === 'j') prevFlash();
+          if (e.key === 'k') nextFlash();
+        }
+        // Single-key section navigation (not pressed during input editing)
+        if (!e.metaKey && !e.ctrlKey && !e.altKey) {
+          if (e.key === 'o') goto('overview');
+          else if (e.key === 't') goto('tutorial');
+          else if (e.key === 'm') goto('modules');
+          else if (e.key === 'g') goto('glossary');
+          else if (e.key === 'q') goto('quizzes');
+          else if (e.key === 'f') goto('flashcards');
+          else if (e.key === 'p') goto('podcast');
         }
       });
     });
@@ -404,12 +503,13 @@ Avalie:`;
       activeQuizId, activeQuiz, mcAnswers, shortAnswers, shortRevealed,
       shortKey, quizAnswered, quizProgress, answerMc, revealShort, optionClass,
       grading, gradingLoading, gradeShort, gradingStyle,
-      flashIndex, flashFilter, flipped, knownMap, knownCount,
+      flashIndex, flashFilter, flashSourceFilter, flipped, knownMap, knownCount,
       visibleFlashcards, currentFlash, prevFlash, nextFlash, markFlash,
       shuffleFlashcards, resetOrder,
       navItems, goto, t, renderMd, renderMdInline,
-      titleDisplay, shortRepo,
-      moduleTintStyle
+      titleDisplay, shortRepo, readTime,
+      moduleTintStyle,
+      exportProgress, importProgress
     };
   }
 });
