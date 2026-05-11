@@ -49,6 +49,10 @@ If `content_path` is missing, stop and report that the audit cannot run without 
    - `99-podcast/script.md`
    - `99-podcast/metadata.json`
    - Required files must not be empty or trivially small.
+   - **Render bundle (only when `/genie-render` was run after `/genie-learn`)**:
+     - `index.html` is optional — its absence is `INFO` (rendering is a separate, opt-in step).
+     - When `index.html` is present, `assets/style.css` AND `assets/app.js` must also be present. Either one missing is a `BLOCKER` — the page will load broken (no styles or no Vue app). This typically means the user has a legacy single-file `index.html` from before the modular render and should re-run `/genie-render <owner_name>`.
+     - When all three exist, do not parse them; just confirm presence.
 2. **Language consistency**:
    - Main prose should mostly match `language`.
    - For `language=pt-BR`, flag structural headings in English as `WARNING`, including `## Questions`, `## Answer key`, `## Production notes`, `## Script`, `## Overview`, `## Tutorial`, `## Glossary`, `## Introduction`, and `## Summary`.

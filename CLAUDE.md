@@ -24,9 +24,9 @@ The orchestrator (the `genie-learn` skill) clones the repo into `repos/<owner>-<
 - `40-quizzes/*.md` — general and module-level quizzes
 - `90-validation.md` — validation report
 - `99-podcast/script.md` and `99-podcast/metadata.json` — podcast text assets
-- `index.html` — interactive single-page course (added by `/genie-render`)
+- `index.html` + `assets/style.css` + `assets/app.js` — interactive course bundle (added by `/genie-render`). The course payload is inlined inside `index.html` as base64; `style.css` and `app.js` are referenced via plain `<link>`/`<script src>` with cache-busting `?v=<sha1>` query strings.
 
-The orchestrator also runs a read-only post-run audit in chat after `90-validation.md` is written. `/genie-render` is independent: re-running it overwrites `index.html` without touching the learner's `localStorage` progress in their browser.
+The orchestrator also runs a read-only post-run audit in chat after `90-validation.md` is written. `/genie-render` is independent: re-running it overwrites the 3-file bundle byte-for-byte (idempotent) without touching the learner's `localStorage` progress in their browser.
 
 ## Architecture
 
@@ -41,8 +41,10 @@ The orchestrator also runs a read-only post-run audit in chat after `90-validati
 - **`.claude/agents/course-remediator.md`** — applies automatic, allow-listed fixes to validator findings (clone-path leak, generation-footer leak, English structural headings on non-English courses, tolerance bands on numeric short-answer questions, missing target-language glosses on coined glossary terms, low-confidence path-range fixes, broken-link typos). Idempotent; runs between `course-validator` and `post-run-course-auditor`. Updates `90-validation.md` in place and writes `91-remediation.md`.
 - **`.claude/agents/post-run-course-auditor.md`** — performs the final read-only post-run audit and returns a chat report without writing files.
 - **`.claude/skills/genie-render/SKILL.md`** — orchestrator for the HTML renderer. Invokes `scripts/render_course.py`.
-- **`scripts/render_course.py`** — deterministic Python renderer (stdlib only). Reads `content/<owner>-<name>/`, parses quizzes/glossary/modules, derives flashcards from glossary + multiple-choice questions, and writes `content/<owner>-<name>/index.html`.
-- **`scripts/templates/course.html`** — single-file template (Vue 3 + Tailwind via CDN, marked.js for client-side Markdown). Paper & Ink styled per `DESIGN.md`.
+- **`scripts/render_course.py`** — deterministic Python renderer (stdlib only). Reads `content/<owner>-<name>/`, parses quizzes/glossary/modules, derives flashcards from glossary + multiple-choice questions, writes `content/<owner>-<name>/index.html`, and copies `style.css` + `app.js` into `content/<owner>-<name>/assets/` with a SHA1-based cache-busting version string.
+- **`scripts/templates/course.html`** — HTML shell (Vue 3 + Tailwind via CDN, marked.js for client-side Markdown, Tailwind config inline, course payload bootstrap inline as base64). Paper & Ink styled per `DESIGN.md`.
+- **`scripts/templates/course_assets/style.css`** — extracted CSS (Paper & Ink theme, components, dark mode, accent variants). Copied verbatim into each course's `assets/style.css` on render.
+- **`scripts/templates/course_assets/app.js`** — extracted Vue 3 Options API app (state, persistence, quizzes, flashcards, keyboard navigation, tweaks). Copied verbatim into each course's `assets/app.js` on render.
 
 ## Conventions
 
@@ -50,6 +52,7 @@ The orchestrator also runs a read-only post-run audit in chat after `90-validati
 - Each subagent has minimum-privilege tools. Only `repo-cartographer` has `Bash`.
 - Subagents communicate with the orchestrator via filesystem (output files) and a JSON contract returned by the cartographer.
 - The skill is the only entry point. Do not invoke subagents directly from another context unless debugging.
+- The render output is a 3-file bundle (`index.html` + `assets/style.css` + `assets/app.js`). The course payload is inlined inside `index.html` as base64 — never split into a separate JSON file (CORS would break under `file://`). To share a course, zip the entire `content/<owner-name>/` directory; relative paths are preserved.
 
 ## Project Objective
 

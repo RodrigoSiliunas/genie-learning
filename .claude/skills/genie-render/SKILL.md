@@ -1,12 +1,12 @@
 ---
 name: genie-render
-description: Render a generated Genie Learning course as a single interactive HTML file (Vue 3 + Tailwind via CDN, Notion-styled). The output lets a learner navigate the overview, tutorial, glossary, modules, quizzes, derived flashcards, and podcast — all in one self-contained page that opens via file://. Trigger with /genie-render <owner-name>.
+description: Render a generated Genie Learning course as an interactive HTML bundle (`index.html` + `assets/style.css` + `assets/app.js`, Vue 3 + Tailwind via CDN, Notion-styled). The output lets a learner navigate the overview, tutorial, glossary, modules, quizzes, derived flashcards, and podcast — opens via file:// (CSS/JS load through plain `<link>`/`<script src>`, course payload stays inlined in `index.html` as base64 to avoid CORS). Trigger with /genie-render <owner-name>.
 allowed-tools: Bash(python:*), Bash(py:*), Read, Glob
 ---
 
-# Genie Render — Course → Single-page HTML
+# Genie Render — Course → Interactive HTML Bundle
 
-You are running the `genie-render` skill. Your job is to take a course already generated under `content/<owner>-<name>/` (by `/genie-learn`) and turn it into one interactive `index.html` next to those Markdown files.
+You are running the `genie-render` skill. Your job is to take a course already generated under `content/<owner>-<name>/` (by `/genie-learn`) and turn it into an interactive `index.html` (plus an `assets/` folder with `style.css` and `app.js`) next to those Markdown files.
 
 You are **pure orchestration**. The actual rendering is deterministic and lives in `scripts/render_course.py`. Do not read the course content yourself, do not generate HTML inline.
 
@@ -70,10 +70,13 @@ The script:
 - Derives flashcards from glossary terms and from multiple-choice quiz questions.
 - Detects optional audio at `99-podcast/podcast.{mp3,wav,m4a,ogg}` — including any file generated in Step 2.
 - Substitutes the `course_data` JSON into `scripts/templates/course.html` and writes `content/<owner_name>/index.html`.
+- Copies `style.css` and `app.js` from `scripts/templates/course_assets/` into `content/<owner_name>/assets/` (overwrites on every run). The HTML references them with a cache-busting `?v=<sha1>` query string derived from the asset bytes — identical re-runs produce identical bytes; any edit to CSS/JS rotates the hash.
 
 ## Step 4 — Report
 
-Forward the renderer's stdout to the user (it already prints the output path, size, counts, and a `file://` URL to open). Add one short line summarizing whether the audio is present (mention if it was generated in this run vs. already existed vs. skipped) and that re-running is safe (idempotent — overwrites the HTML, never the learner's `localStorage` progress in their browser).
+Forward the renderer's stdout to the user (it already prints the output path, size of `index.html` + size of `assets/`, counts, and a `file://` URL to open). Add two short lines:
+1. Whether the audio is present (mention if it was generated in this run vs. already existed vs. skipped).
+2. The output is a 3-file bundle (`index.html` + `assets/style.css` + `assets/app.js`). To share the course, zip the entire `content/<owner_name>/` directory — paths are relative. Re-running is safe (idempotent: overwrites HTML and assets byte-for-byte when nothing changed; never touches the learner's `localStorage` progress in their browser, which is keyed by the `file://` origin).
 
 ## Failure handling
 
@@ -88,3 +91,5 @@ Forward the renderer's stdout to the user (it already prints the output path, si
 - Do not generate HTML inline. The script + template own that surface.
 - Do not download CDN assets locally — the rendered page intentionally loads Vue, Tailwind, and marked from CDNs at first open.
 - Do not invent default values for `<owner-name>` if the user omitted it. Stop and ask.
+- Do not advise the user to share `index.html` alone — it requires `assets/style.css` and `assets/app.js` next to it. Share the whole `content/<owner_name>/` folder.
+- Do not move the course payload into a separate `data.json` — it is intentionally inlined as base64 inside `index.html` so the page works under `file://` without `fetch()`/CORS failures.

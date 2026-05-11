@@ -1,9 +1,20 @@
-"""Render a generated Genie Learning course as a single interactive HTML file.
+"""Render a generated Genie Learning course as an interactive HTML bundle.
 
-Reads `content/<owner>-<name>/` produced by /genie-learn and writes
-`content/<owner>-<name>/index.html` — a self-contained Vue 3 + Tailwind page
-that lets a learner browse the overview, tutorial, glossary, modules, quizzes,
-flashcards (derived from glossary + multiple-choice quizzes), and podcast.
+Reads `content/<owner>-<name>/` produced by /genie-learn and writes a 3-file
+bundle next to the Markdown sources:
+
+    content/<owner>-<name>/
+    ├── index.html        — Vue 3 + Tailwind shell with the course payload inlined as base64
+    ├── assets/style.css  — copied from scripts/templates/course_assets/style.css
+    └── assets/app.js     — copied from scripts/templates/course_assets/app.js
+
+Asset files are referenced from index.html with a cache-busting `?v=<hash>` query
+string derived deterministically from the asset bytes (SHA1, first 10 hex chars).
+Identical re-runs produce byte-identical output; any edit to an asset rotates the
+hash and forces the browser to refetch.
+
+The course payload stays inlined in `index.html` (not split into `data.json`) so
+the page works under `file://` without CORS errors.
 
 Usage:
     python scripts/render_course.py <owner-name>
@@ -15,11 +26,16 @@ from __future__ import annotations
 
 import argparse
 import base64
+import hashlib
 import json
 import re
 import sys
 from pathlib import Path
 from typing import Any
+
+ASSET_FILES: tuple[str, ...] = ("style.css", "app.js")
+ASSET_VERSION_PLACEHOLDER = "__GENIE_ASSET_VERSION__"
+DATA_PLACEHOLDER = "/* GENIE_DATA */"
 
 # ---------------------------------------------------------------------------
 # Chrome i18n strings
@@ -551,22 +567,48 @@ def build_course_data(content_dir: Path, owner_name: str) -> dict[str, Any]:
     }
 
 
+def copy_assets(template_dir: Path, output_dir: Path) -> str:
+    """Copy `course_assets/*` next to `index.html` and return a cache-busting version string.
+
+    The version is the first 10 hex chars of the SHA1 of the concatenated asset bytes —
+    deterministic per content (idempotent re-runs do not invalidate the browser cache),
+    sensitive to any edit (CSS or JS change rotates the hash).
+    """
+    src_dir = template_dir / "course_assets"
+    dst_dir = output_dir / "assets"
+    dst_dir.mkdir(parents=True, exist_ok=True)
+    digest = hashlib.sha1()
+    for name in ASSET_FILES:
+        src_path = src_dir / name
+        if not src_path.is_file():
+            raise SystemExit(f"template asset missing: {src_path}")
+        data = src_path.read_bytes()
+        digest.update(data)
+        (dst_dir / name).write_bytes(data)
+    return digest.hexdigest()[:10]
+
+
 def render(template_path: Path, course_data: dict[str, Any], output_path: Path) -> None:
     template = template_path.read_text(encoding="utf-8")
-    placeholder = "/* GENIE_DATA */"
-    if placeholder not in template:
-        raise SystemExit(f"template missing placeholder `{placeholder}`")
+    if DATA_PLACEHOLDER not in template:
+        raise SystemExit(f"template missing placeholder `{DATA_PLACEHOLDER}`")
+    if ASSET_VERSION_PLACEHOLDER not in template:
+        raise SystemExit(f"template missing placeholder `{ASSET_VERSION_PLACEHOLDER}`")
+    asset_version = copy_assets(template_path.parent, output_path.parent)
     payload = json.dumps(course_data, ensure_ascii=False, separators=(",", ":"))
     b64 = base64.b64encode(payload.encode("utf-8")).decode("ascii")
-    output_path.write_text(template.replace(placeholder, b64, 1), encoding="utf-8")
+    rendered = template.replace(DATA_PLACEHOLDER, b64, 1).replace(
+        ASSET_VERSION_PLACEHOLDER, asset_version
+    )
+    output_path.write_text(rendered, encoding="utf-8")
 
 
 def main(argv: list[str]) -> int:
-    parser = argparse.ArgumentParser(description="Render a Genie Learning course as a single HTML file.")
+    parser = argparse.ArgumentParser(description="Render a Genie Learning course as index.html + assets/ bundle.")
     parser.add_argument("owner_name", help="Course directory name under content/ (e.g. expressjs-express).")
     parser.add_argument("--project-root", default=None, help="Project root (default: parent of scripts/).")
-    parser.add_argument("--output-dir", default=None, help="Directory to write index.html into (default: content/<owner_name>/).")
-    parser.add_argument("--check", action="store_true", help="Validate the course without writing HTML.")
+    parser.add_argument("--output-dir", default=None, help="Directory to write index.html (and assets/) into (default: content/<owner_name>/).")
+    parser.add_argument("--check", action="store_true", help="Validate the course without writing HTML or assets.")
     args = parser.parse_args(argv)
 
     project_root = Path(args.project_root) if args.project_root else Path(__file__).resolve().parent.parent
@@ -598,13 +640,15 @@ def main(argv: list[str]) -> int:
     render(template_path, course_data, output_path)
 
     size_kb = output_path.stat().st_size / 1024
+    assets_dir = output_path.parent / "assets"
+    assets_size_kb = sum(p.stat().st_size for p in assets_dir.iterdir() if p.is_file()) / 1024
     n_modules = len(course_data["modules"])
     n_quizzes = len(course_data["quizzes"])
     n_cards = len(course_data["flashcards"])
     n_terms = sum(len(letter["terms"]) for letter in course_data["glossary"])
     audio_status = "yes" if course_data["podcast"]["audio_file"] else "no"
 
-    print(f"Wrote {output_path} ({size_kb:.1f} KB)")
+    print(f"Wrote {output_path} ({size_kb:.1f} KB) + assets/ ({assets_size_kb:.1f} KB)")
     print(f"Modules: {n_modules} | Quizzes: {n_quizzes} | Glossary terms: {n_terms} | Flashcards: {n_cards} | Audio: {audio_status}")
     print(f"Open with: file:///{output_path.as_posix()}")
     return 0
