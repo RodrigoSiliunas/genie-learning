@@ -399,11 +399,16 @@
           <h2 class="display-serif text-[40px] sm:text-[56px] leading-none mb-3"><em>Recall</em>, repeat<em class="text-[var(--accent)]">.</em></h2>
           <p class="text-[15px] text-[var(--muted)] max-w-[55ch]">{{ t('flashcards_subtitle') }}</p>
         </header>
-
-        <div class="flex flex-wrap items-center justify-between gap-4 mb-7">
-          <div class="seg">
-            <button @click="flashFilter = 'all'" :class="{'is-active': flashFilter === 'all'}">{{ t('show_all') }}</button>
-            <button @click="flashFilter = 'unknown'" :class="{'is-active': flashFilter === 'unknown'}">{{ t('show_only_unknown') }}</button>
+          <div class="flex flex-wrap items-center justify-between gap-4 mb-7">
+          <div class="flex flex-wrap gap-3">
+            <div class="seg">
+              <button @click="flashFilter = 'all'" :class="{'is-active': flashFilter === 'all'}">{{ t('show_all') }}</button>
+              <button @click="flashFilter = 'unknown'" :class="{'is-active': flashFilter === 'unknown'}">{{ t('show_only_unknown') }}</button>
+            </div>
+            <div class="seg">
+              <button @click="shuffleFlashcards" :class="{'is-active': flashOrder !== null}">Shuffle</button>
+              <button v-if="flashOrder !== null" @click="resetOrder" class="text-[var(--muted)] hover:text-[var(--ink)]">Reset</button>
+            </div>
           </div>
           <div class="font-mono text-[12px] text-[var(--muted)]">
             <span class="text-[var(--ink)] font-medium">{{ knownCount }}</span> / {{ data.flashcards.length }} {{ t('known_marker') }}
