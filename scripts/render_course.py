@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Render a generated Genie Learning course as an interactive HTML bundle.
 
 Reads `content/<owner>-<name>/` produced by /genie-learn and writes a 3-file
