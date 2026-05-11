@@ -74,11 +74,12 @@ Use this structure:
 ## Generation rules
 
 - Ground every answer in the generated Markdown material.
-- Prefer 6-10 questions for the general quiz and 4-6 questions per module quiz.
+- **Default: generate at most 20 questions total** across the general quiz and all module quizzes. Distribute them naturally — more important modules get more questions, the general quiz gets the broadest coverage. If the course has few modules (~1-2), cap the general quiz at ~10 and fill the rest with module questions. If the course has many modules (~5+), give each module 2-4 questions and the general quiz 4-6.
 - Mix multiple choice, short answer, and code-reading or flow-tracing questions when the material supports it.
 - Do not invent APIs, commands, architecture, or implementation details absent from the generated content.
 - If module lessons are missing, still write the general quiz and note that module quizzes were skipped.
 - Keep code identifiers and file paths exactly as written in the course.
+- **Formatting rules for questions:** Use `\`\`backticks\`\`` for code identifiers, file paths, commands, and API names. Use `**bold**` for emphasis and pedagogical labels within questions. Ensure every opening `**` has a closing `**`. Do not leave raw asterisks intended as bold unclosed — that leaks literal `**` into the rendered HTML.
 
 ## When you finish
 

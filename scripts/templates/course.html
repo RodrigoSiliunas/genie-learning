@@ -333,7 +333,7 @@
                 <span class="font-mono text-[11px] text-[var(--muted-soft)]">Q{{ String(qi+1).padStart(2,'0') }}</span>
                 <span class="badge badge-accent">{{ q.kind === 'mc' ? t('mc_label') : q.kind === 'short' ? t('short_label') : t('trace_label') }}</span>
               </div>
-              <h3 class="font-serif text-[22px] sm:text-[26px] leading-[1.25] mb-6 text-[var(--ink)]">{{ q.prompt }}</h3>
+              <h3 class="font-serif text-[22px] sm:text-[26px] leading-[1.25] mb-6 text-[var(--ink)]" v-html="renderMdInline(q.prompt)"></h3>
 
               <!-- MC -->
               <template v-if="q.kind === 'mc'">
