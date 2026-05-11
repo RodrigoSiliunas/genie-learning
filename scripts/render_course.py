@@ -31,13 +31,13 @@ import json
 import os
 import re
 import sys
-from functools import partial
 from pathlib import Path
 from typing import Any
 
 ASSET_FILES: tuple[str, ...] = ("style.css", "app.js")
 ASSET_VERSION_PLACEHOLDER = "__GENIE_ASSET_VERSION__"
 DATA_PLACEHOLDER = "/* GENIE_DATA */"
+VERSION = "1.1.0"
 GRADER_KEY_PLACEHOLDER = "/* GENIE_GRADER_KEY */"
 
 # ---------------------------------------------------------------------------
@@ -725,12 +725,17 @@ def render(template_path: Path, course_data: dict[str, Any], output_path: Path, 
 
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(description="Render a Genie Learning course as index.html + assets/ bundle.")
-    parser.add_argument("owner_name", help="Course directory name under content/ (e.g. expressjs-express).")
+    parser.add_argument("owner_name", nargs="?", help="Course directory name under content/ (e.g. expressjs-express).")
     parser.add_argument("--project-root", default=None, help="Project root (default: parent of scripts/).")
     parser.add_argument("--output-dir", default=None, help="Directory to write index.html (and assets/) into (default: content/<owner_name>/).")
     parser.add_argument("--check", action="store_true", help="Validate the course without writing HTML or assets.")
     parser.add_argument("--quiet", action="store_true", help="Suppress informational stdout (errors still go to stderr).")
+    parser.add_argument("--version", action="store_true", help="Print version and exit.")
     args = parser.parse_args(argv)
+
+    if args.version:
+        print(VERSION)
+        return 0
 
     project_root = Path(args.project_root) if args.project_root else Path(__file__).resolve().parent.parent
     content_dir = project_root / "content" / args.owner_name
@@ -754,9 +759,17 @@ def main(argv: list[str]) -> int:
         n_cards = len(course_data["flashcards"])
         n_terms = sum(len(letter["terms"]) for letter in course_data["glossary"])
         audio_status = "yes" if course_data["podcast"]["audio_file"] else "no"
-        info = partial(print) if not args.quiet else lambda *a, **kw: None
+        info = print if not args.quiet else (lambda *a, **kw: None)
         info(f"check: course '{args.owner_name}' is valid")
         info(f"Modules: {n_modules} | Quizzes: {n_quizzes} | Glossary terms: {n_terms} | Flashcards: {n_cards} | Audio: {audio_status}")
+
+        warnings = 0
+        for q in course_data["quizzes"]:
+            if len(q["questions"]) == 0:
+                info(f"  warning: quiz '{q['id']}' has 0 questions (missing or malformed ## Perguntas/## Questions heading?)")
+                warnings += 1
+        if warnings:
+            info(f"  ({warnings} warning(s) — course will still render, missing quizzes will be skipped)")
         return 0
 
     render(template_path, course_data, output_path, project_root)
