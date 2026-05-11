@@ -28,6 +28,7 @@ import argparse
 import base64
 import hashlib
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -36,6 +37,7 @@ from typing import Any
 ASSET_FILES: tuple[str, ...] = ("style.css", "app.js")
 ASSET_VERSION_PLACEHOLDER = "__GENIE_ASSET_VERSION__"
 DATA_PLACEHOLDER = "/* GENIE_DATA */"
+GRADER_KEY_PLACEHOLDER = "/* GENIE_GRADER_KEY */"
 
 # ---------------------------------------------------------------------------
 # Chrome i18n strings
@@ -469,6 +471,93 @@ def derive_flashcards(glossary: list[dict[str, Any]], quizzes: list[dict[str, An
     return cards
 
 
+REPO_LINES_PER_FILE = 100
+
+
+def build_grader_context(
+    content_dir: Path,
+    repos_dir: Path | None,
+    quizzes: list[dict],
+    modules: list[dict],
+    overview_raw: str | None,
+    tutorial_raw: str | None,
+) -> dict[str, Any]:
+    """Index context (course material + cloned repo snippets) for each short/trace question.
+
+    Returns ``{question_id: {context, answer_key, module_ref, quiz_title}}``.
+    """
+    module_by_slug: dict[str, dict] = {m["name"]: m for m in modules}
+    repo_cache: dict[str, str | None] = {}
+    ref_pat = re.compile(r'`([a-zA-Z0-9_\-./]+(?:\.\w+)+)`')
+
+    def _fetch_source(path_ref: str) -> str | None:
+        if path_ref in repo_cache:
+            return repo_cache[path_ref]
+        if repos_dir is None:
+            repo_cache[path_ref] = None
+            return None
+        name = Path(path_ref).name
+        candidates = sorted(repos_dir.rglob(name)) or sorted(repos_dir.rglob(path_ref))
+        for p in candidates:
+            try:
+                text = p.read_text("utf-8", errors="replace")
+                lines = text.splitlines()
+                head = lines[:REPO_LINES_PER_FILE]
+                tail = lines[-30:] if len(lines) > REPO_LINES_PER_FILE + 30 else []
+                content = "\n".join(head)
+                if tail:
+                    content += "\n\n# ... (trecho final do arquivo) ...\n" + "\n".join(tail)
+                repo_cache[path_ref] = content
+                return content
+            except Exception:
+                continue
+        repo_cache[path_ref] = None
+        return None
+
+    def _extract_refs(md: str) -> list[str]:
+        return list(set(ref_pat.findall(md)))
+
+    ctx: dict[str, Any] = {}
+    for quiz in quizzes:
+        qid = quiz["id"]
+        # Guess module slug from quiz id: "01-middleware-quiz" -> "middleware"
+        m = re.match(r"^\d+-([a-z][a-z0-9-]*)", qid)
+        slug = m.group(1) if m and m.group(1) in module_by_slug else None
+
+        for qi, q in enumerate(quiz["questions"]):
+            if q.get("kind") not in ("short", "trace"):
+                continue
+            parts: list[str] = []
+            if slug and slug in module_by_slug:
+                mod = module_by_slug[slug]
+                parts.append(f"## Module: {mod['title_display']}")
+                parts.append((mod.get("raw") or "")[:2000])
+                refs = _extract_refs(mod.get("raw") or "")
+                snippets = [_fetch_source(r) for r in refs if _fetch_source(r)]
+                if snippets:
+                    parts.append("## Repository source code (relevant excerpts)")
+                    parts.extend(snippets)
+            else:
+                # General quiz — use overview + tutorial
+                ov = strip_first_h1(overview_raw)
+                if ov:
+                    parts.append("## Overview")
+                    parts.append(ov[:1500])
+                tut = strip_first_h1(tutorial_raw)
+                if tut:
+                    parts.append("## Tutorial")
+                    parts.append(tut[:1500])
+
+            question_id = f"{qid}:{qi}"
+            ctx[question_id] = {
+                "context": "\n\n".join(parts),
+                "answer_key": q.get("answer", ""),
+                "module_ref": slug or "general",
+                "quiz_title": quiz.get("title", qid),
+            }
+    return ctx
+
+
 def discover_modules(content_dir: Path, inventory_modules: list[dict[str, Any]] | None) -> list[dict[str, Any]]:
     """Scan `30-modules/` and merge metadata from the cartographer inventory if available."""
     modules_dir = content_dir / "30-modules"
@@ -600,18 +689,36 @@ def copy_assets(template_dir: Path, output_dir: Path) -> str:
     return digest.hexdigest()[:10]
 
 
-def render(template_path: Path, course_data: dict[str, Any], output_path: Path) -> None:
+def render(template_path: Path, course_data: dict[str, Any], output_path: Path, project_root: Path) -> None:
     template = template_path.read_text(encoding="utf-8")
-    if DATA_PLACEHOLDER not in template:
-        raise SystemExit(f"template missing placeholder `{DATA_PLACEHOLDER}`")
-    if ASSET_VERSION_PLACEHOLDER not in template:
-        raise SystemExit(f"template missing placeholder `{ASSET_VERSION_PLACEHOLDER}`")
+    for placeholder in (DATA_PLACEHOLDER, ASSET_VERSION_PLACEHOLDER, GRADER_KEY_PLACEHOLDER):
+        if placeholder not in template:
+            raise SystemExit(f"template missing placeholder `{placeholder}`")
     asset_version = copy_assets(template_path.parent, output_path.parent)
+
+    # Build grader context (RAG index + repo snippets)
+    content_dir = output_path.parent
+    owner_name = course_data["owner_name"]
+    repos_dir = project_root / "repos" / owner_name
+    if not repos_dir.is_dir():
+        repos_dir = None
+    grader_context = build_grader_context(
+        content_dir=content_dir,
+        repos_dir=repos_dir,
+        quizzes=course_data["quizzes"],
+        modules=course_data["modules"],
+        overview_raw=course_data["overview"]["raw"] if course_data.get("overview") else None,
+        tutorial_raw=course_data["tutorial"]["raw"] if course_data.get("tutorial") else None,
+    )
+    grader_path = output_path.parent / "assets" / "grader_context.json"
+    grader_path.write_text(json.dumps(grader_context, ensure_ascii=False), encoding="utf-8")
+
     payload = json.dumps(course_data, ensure_ascii=False, separators=(",", ":"))
     b64 = base64.b64encode(payload.encode("utf-8")).decode("ascii")
-    rendered = template.replace(DATA_PLACEHOLDER, b64, 1).replace(
-        ASSET_VERSION_PLACEHOLDER, asset_version
-    )
+    api_key = os.environ.get("GEMINI_API_KEY", "")
+    rendered = template.replace(DATA_PLACEHOLDER, b64, 1)
+    rendered = rendered.replace(ASSET_VERSION_PLACEHOLDER, asset_version)
+    rendered = rendered.replace(GRADER_KEY_PLACEHOLDER, api_key)
     output_path.write_text(rendered, encoding="utf-8")
 
 
@@ -649,7 +756,7 @@ def main(argv: list[str]) -> int:
         print(f"Modules: {n_modules} | Quizzes: {n_quizzes} | Glossary terms: {n_terms} | Flashcards: {n_cards} | Audio: {audio_status}")
         return 0
 
-    render(template_path, course_data, output_path)
+    render(template_path, course_data, output_path, project_root)
 
     size_kb = output_path.stat().st_size / 1024
     assets_dir = output_path.parent / "assets"

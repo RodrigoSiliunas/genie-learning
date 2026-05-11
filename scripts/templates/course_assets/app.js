@@ -34,6 +34,11 @@ const app = createApp({
     const flipped = ref(false);
     const knownMap = ref(persisted.knownMap || {});           // { 'front-hash': true }
 
+    /* ---------- Grading (AI short-answer evaluation) ---------- */
+    const grading = ref(persisted.grading || {});             // { 'quizId:qi': HTML string }
+    const gradingLoading = ref({});
+    const graderContext = ref(null);
+
     /* ---------- i18n ---------- */
     const t = (key) => (data.value.chrome && data.value.chrome[key]) || key;
 
@@ -194,6 +199,120 @@ const app = createApp({
       nextFlash();
     };
 
+    /* ---------- Short-answer AI grading ---------- */
+    const gradeShort = async (qid, qi) => {
+      const key = `${qid}:${qi}`;
+      if (gradingLoading.value[key] || grading.value[key]) return;
+
+      const question = activeQuiz.value?.questions[qi];
+      const answer = shortAnswers.value[key];
+      if (!question || !answer?.trim()) return;
+
+      const ctx = graderContext.value?.[key];
+      if (!ctx) {
+        grading.value = { ...grading.value, [key]: '<div class="flex items-start gap-3"><span class="text-[1.4rem] leading-none mt-0.5">⚠️</span><div><strong>Contexto não disponível</strong><p class="mt-1.5 text-[14px] leading-relaxed" style="color:var(--ink-soft)">O arquivo <code>assets/grader_context.json</code> não foi encontrado. Re-renderize o curso para gerá-lo.</p></div></div>' };
+        return;
+      }
+
+      gradingLoading.value = { ...gradingLoading.value, [key]: true };
+
+      const prompt = `Você é um assistente de correção de provas. Responda APENAS com um JSON neste formato, sem markdown, sem texto extra:
+{"status": "CORRETO" | "PARCIALMENTE_CORRETO" | "INCORRETO", "justificativa": "breve explicação de 1-2 frases"}
+
+CONTEXTO DO CURSO (use ESTE contexto como fonte primária):
+${ctx.context}
+
+REGRAS:
+1. Avalie a resposta do aluno com base APENAS no contexto fornecido acima.
+2. Se o contexto for insuficiente para avaliar, use seu conhecimento técnico geral sobre a tecnologia — mas indique claramente com "(baseado em conhecimento geral)" na justificativa.
+3. CORRETO = resposta captura o conceito central
+4. PARCIALMENTE_CORRETO = resposta toca no assunto mas falta precisão ou detalhe
+5. INCORRETO = resposta errada, contradiz o contexto, ou não responde a pergunta
+
+Pergunta: ${question.prompt}
+Resposta de referência: ${ctx.answer_key}
+
+Resposta do aluno: ${answer}
+
+Avalie:`;
+
+      const model = 'gemma-3-27b-it';
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${window.__GRADER_KEY}`;
+
+      try {
+        let resp = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: { temperature: 0.15, maxOutputTokens: 300 }
+          })
+        });
+
+        if (!resp.ok && model === 'gemma-3-27b-it') {
+          // Fallback to gemini-2.0-flash
+          const fbUrl = url.replace('gemma-3-27b-it', 'gemini-2.0-flash');
+          resp = await fetch(fbUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: { temperature: 0.15, maxOutputTokens: 300 }
+            })
+          });
+        }
+
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+
+        const data = await resp.json();
+        const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+        let result;
+        try {
+          const cleaned = text.replace(/```(?:json)?\n?/g, '').trim();
+          result = JSON.parse(cleaned);
+        } catch {
+          result = { status: 'PARCIALMENTE_CORRETO', justificativa: text.slice(0, 200) };
+        }
+
+        const status = result.status || 'PARCIALMENTE_CORRETO';
+        const icon = status === 'CORRETO' ? '✅'
+                   : status === 'PARCIALMENTE_CORRETO' ? '⚠️' : '❌';
+
+        grading.value = {
+          ...grading.value,
+          [key]: `<div class="flex items-start gap-3">
+            <span class="text-[1.4rem] leading-none mt-0.5">${icon}</span>
+            <div>
+              <strong style="font-size:1rem">${status.replace(/_/g, ' ')}</strong>
+              <p class="mt-1.5 text-[14px] leading-relaxed" style="color:var(--ink-soft)">${result.justificativa || ''}</p>
+            </div>
+          </div>`
+        };
+      } catch (err) {
+        grading.value = {
+          ...grading.value,
+          [key]: `<div class="flex items-start gap-3">
+            <span class="text-[1.4rem] leading-none mt-0.5">⚠️</span>
+            <div>
+              <strong>Erro na correção</strong>
+              <p class="mt-1.5 text-[14px] leading-relaxed" style="color:var(--ink-soft)">${err.message || 'Falha ao conectar com a API Gemini.'}</p>
+              <p class="mt-1 text-[12px]" style="color:var(--muted)">Verifique se GEMINI_API_KEY está configurada e re-renderize o curso.</p>
+            </div>
+          </div>`
+        };
+      } finally {
+        gradingLoading.value = { ...gradingLoading.value, [key]: false };
+      }
+    };
+
+    const gradingStyle = (key) => {
+      const html = grading.value[key] || '';
+      if (html.includes('CORRETO')) return { background: 'var(--correct-bg)', borderColor: 'var(--correct)' };
+      if (html.includes('INCORRETO')) return { background: 'var(--wrong-bg)', borderColor: 'var(--wrong)' };
+      return { background: '#fef9e7', borderColor: '#f5d75e' }; // amber
+    };
+
     /* ---------- Nav ---------- */
     const goto = (id) => {
       if (view.value !== id) {
@@ -222,18 +341,24 @@ const app = createApp({
         shortRevealed: shortRevealed.value,
         flashIndex: flashIndex.value,
         flashFilter: flashFilter.value,
-        knownMap: knownMap.value
+        knownMap: knownMap.value,
+        grading: grading.value
       });
     };
 
     watch([view, theme, accent, activeQuizId, flashIndex, flashFilter,
-           mcAnswers, shortAnswers, shortRevealed, knownMap], () => { persist(); }, { deep: true });
+           mcAnswers, shortAnswers, shortRevealed, knownMap, grading], () => { persist(); }, { deep: true });
     watch([theme, accent], applyTweaks, { immediate: true });
     watch(flashFilter, () => { flashIndex.value = 0; flipped.value = false; });
     watch(view, () => { flipped.value = false; });
 
     onMounted(() => {
       applyTweaks();
+      // Load grader context (RAG index for short-answer AI evaluation)
+      fetch('assets/grader_context.json')
+        .then(r => r.json())
+        .then(ctx => { graderContext.value = ctx; })
+        .catch(() => {});
       // keyboard: left/right for flashcards & modules
       window.addEventListener('keydown', (e) => {
         if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
@@ -252,6 +377,7 @@ const app = createApp({
       glossaryQuery, filteredGlossary, glossaryCount,
       activeQuizId, activeQuiz, mcAnswers, shortAnswers, shortRevealed,
       shortKey, quizAnswered, quizProgress, answerMc, revealShort, optionClass,
+      grading, gradingLoading, gradeShort, gradingStyle,
       flashIndex, flashFilter, flipped, knownMap, knownCount,
       visibleFlashcards, currentFlash, prevFlash, nextFlash, markFlash,
       navItems, goto, t, renderMd, renderMdInline,
