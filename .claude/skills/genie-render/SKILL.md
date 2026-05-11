@@ -1,6 +1,6 @@
 ---
 name: genie-render
-description: Render a generated Genie Learning course as an interactive HTML bundle (`index.html` + `assets/style.css` + `assets/app.js`, Vue 3 + Tailwind via CDN, Notion-styled). The output lets a learner navigate the overview, tutorial, glossary, modules, quizzes, derived flashcards, and podcast — opens via file:// (CSS/JS load through plain `<link>`/`<script src>`, course payload stays inlined in `index.html` as base64 to avoid CORS). Trigger with /genie-render <owner-name>.
+description: Render a generated Genie Learning course as an interactive HTML bundle (`index.html` + `assets/style.css` + `assets/app.js`, Vue 3 + Tailwind via CDN, Paper & Ink design). The output lets a learner navigate the overview, tutorial, glossary, modules, quizzes, derived flashcards, and podcast — opens via file:// (CSS/JS load through plain `<link>`/`<script src>`, course payload stays inlined in `index.html` as base64 to avoid CORS). Trigger with /genie-render <owner-name>.
 allowed-tools: Bash(python:*), Bash(py:*), Read, Glob
 ---
 
