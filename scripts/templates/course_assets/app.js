@@ -76,13 +76,7 @@ const app = createApp({
     };
 
     /* ---------- Computed ---------- */
-    const titleDisplay = computed(() => {
-      const t = data.value.title_display || '';
-      // Add subtle italic to first word for editorial feel
-      const parts = t.split(' ');
-      if (parts.length < 2) return t;
-      return parts.join(' ');
-    });
+    const titleDisplay = computed(() => data.value.title_display || '');
 
     const shortRepo = computed(() => {
       if (!data.value.repo_url) return '';
