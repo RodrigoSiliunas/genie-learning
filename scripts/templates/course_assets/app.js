@@ -434,6 +434,8 @@ Avalie:`;
           if (e.key === 'ArrowRight') nextFlash();
           if (e.key === 'ArrowLeft') prevFlash();
           if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flipped.value = !flipped.value; }
+          if (e.key === 'j') prevFlash();
+          if (e.key === 'k') nextFlash();
         }
         // Single-key section navigation (not pressed during input editing)
         if (!e.metaKey && !e.ctrlKey && !e.altKey) {
