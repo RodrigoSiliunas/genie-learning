@@ -91,6 +91,13 @@ const app = createApp({
       } catch { return data.value.repo_url; }
     });
 
+    const readTime = (md) => {
+      if (!md) return '';
+      const words = md.trim().split(/\s+/).length;
+      const min = Math.max(1, Math.round(words / 200));
+      return `${min} min`;
+    };
+
     const glossaryCount = computed(() =>
       data.value.glossary.reduce((acc, g) => acc + g.terms.length, 0)
     );
@@ -391,7 +398,7 @@ Avalie:`;
       flashIndex, flashFilter, flipped, knownMap, knownCount,
       visibleFlashcards, currentFlash, prevFlash, nextFlash, markFlash,
       navItems, goto, t, renderMd, renderMdInline,
-      titleDisplay, shortRepo,
+      titleDisplay, shortRepo, readTime,
       moduleTintStyle
     };
   }
