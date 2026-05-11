@@ -322,6 +322,7 @@
                   :class="activeQuizId === q.id ? 'bg-[var(--ink)] text-[var(--paper)] border-[var(--ink)]' : 'hairline text-[var(--muted)] hover:text-[var(--ink)] hover:border-[var(--ink)]'">
             <span class="font-medium">{{ q.title }}</span>
             <span class="font-mono text-[11px] opacity-70">{{ quizProgress(q).answered }}/{{ q.questions.length }}</span>
+            <span v-if="quizProgress(q).trace" class="font-mono text-[10px] opacity-50">(+{{ quizProgress(q).trace }} auto)</span>
           </button>
         </div>
 

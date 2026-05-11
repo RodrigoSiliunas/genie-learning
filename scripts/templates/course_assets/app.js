@@ -128,6 +128,7 @@ const app = createApp({
 
     const quizProgress = (q) => {
       let answered = 0;
+      let trace = 0;
       q.questions.forEach((qq, qi) => {
         if (qq.kind === 'mc') {
           if (mcAnswers.value[q.id] && mcAnswers.value[q.id][qi]) answered++;
@@ -135,9 +136,10 @@ const app = createApp({
           if (shortRevealed.value[shortKey(q.id, qi)]) answered++;
         } else {
           answered++; // trace always "answered"
+          trace++;
         }
       });
-      return { answered };
+      return { answered, trace, total: q.questions.length };
     };
 
     const answerMc = (qid, qi, key) => {
