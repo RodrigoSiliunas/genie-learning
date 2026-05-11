@@ -7,6 +7,28 @@ function saveState(s) {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); } catch {}
 }
 
+/* SM-2 lite helpers */
+const DAY_MS = 86_400_000;
+function defaultSched() { return { ef: 2.5, interval: 0, reps: 0, due: Date.now(), lastReview: null, lapses: 0 }; }
+function previewInterval(grade, s) {
+  if (grade === 'again') return 10 * 60 * 1000;
+  if (grade === 'hard')  return s.reps < 1 ? DAY_MS : Math.round(s.interval * 1.2);
+  if (grade === 'easy')  return s.reps < 1 ? 4 * DAY_MS : Math.round(s.interval * s.ef * 1.3);
+  /* good */
+  if (s.reps < 1) return DAY_MS;
+  if (s.reps < 2) return 3 * DAY_MS;
+  return Math.round(s.interval * s.ef);
+}
+function rateCard(grade, s) {
+  s = { ...s };
+  if (grade === 'again') { s.reps = 0; s.interval = 10 * 60 * 1000; s.ef = Math.max(1.3, s.ef - 0.20); s.lapses += 1; }
+  else if (grade === 'hard') { s.reps += 1; s.interval = s.reps < 1 ? DAY_MS : Math.round(s.interval * 1.2); s.ef = Math.max(1.3, s.ef - 0.15); }
+  else if (grade === 'easy') { s.reps += 1; s.interval = s.reps < 1 ? 4 * DAY_MS : Math.round(s.interval * s.ef * 1.3); s.ef = Math.min(2.7, s.ef + 0.15); }
+  else { s.reps += 1; s.interval = s.reps < 1 ? DAY_MS : (s.reps < 2 ? 3 * DAY_MS : Math.round(s.interval * s.ef)); }
+  s.due = Date.now() + s.interval; s.lastReview = Date.now();
+  return s;
+}
+
 const { createApp, ref, computed, watch, onMounted } = Vue;
 
 const app = createApp({
@@ -32,7 +54,20 @@ const app = createApp({
     const flashIndex = ref(persisted.flashIndex || 0);
     const flashFilter = ref(persisted.flashFilter || 'all');
     const flipped = ref(false);
-    const knownMap = ref(persisted.knownMap || {});           // { 'front-hash': true }
+    /* schedule state — migrate from legacy knownMap if needed */
+    let schedule = persisted.schedule || {};
+    if (!persisted.schedule && persisted.knownMap) {
+      const now = Date.now();
+      for (const h in persisted.knownMap) {
+        schedule[h] = { ef: 2.5, interval: 3*DAY_MS, reps: 2, due: now + 3*DAY_MS, lastReview: null, lapses: 0 };
+      }
+    }
+    const scheduleRef = ref(schedule);
+    const knownMap = computed(() => {
+      const m = {};
+      for (const h in scheduleRef.value) { if (scheduleRef.value[h].reps >= 2) m[h] = true; }
+      return m;
+    });
 
     /* ---------- Grading (AI short-answer evaluation) ---------- */
     const grading = ref(persisted.grading || {});             // { 'quizId:qi': HTML string }
@@ -178,6 +213,18 @@ const app = createApp({
     });
     const currentFlash = computed(() => visibleFlashcards.value[Math.min(flashIndex.value, visibleFlashcards.value.length - 1)] || data.value.flashcards[0]);
     const knownCount = computed(() => data.value.flashcards.filter(f => knownMap.value[flashHash(f)]).length);
+    const scheduleFor = (f) => scheduleRef.value[flashHash(f)] || defaultSched();
+    const lastReviewLabel = computed(() => {
+      const f = currentFlash.value;
+      if (!f) return '';
+      const s = scheduleFor(f);
+      if (!s.lastReview) return t('last_review_never');
+      const diff = Date.now() - s.lastReview;
+      if (diff < DAY_MS) return t('last_review_today');
+      const days = Math.floor(diff / DAY_MS);
+      if (days === 1) return t('last_review_yesterday');
+      return t('last_review_days_ago').replace('{n}', days);
+    });
 
     const prevFlash = () => {
       if (!visibleFlashcards.value.length) return;
@@ -189,13 +236,12 @@ const app = createApp({
       flipped.value = false;
       flashIndex.value = (flashIndex.value + 1) % visibleFlashcards.value.length;
     };
-    const markFlash = (known) => {
+    const rateFlash = (grade) => {
       const f = currentFlash.value;
       if (!f) return;
       const h = flashHash(f);
-      const m = { ...knownMap.value };
-      if (known) m[h] = true; else delete m[h];
-      knownMap.value = m;
+      const s = scheduleFor(f);
+      scheduleRef.value = { ...scheduleRef.value, [h]: rateCard(grade, s) };
       nextFlash();
     };
 
@@ -341,13 +387,13 @@ Avalie:`;
         shortRevealed: shortRevealed.value,
         flashIndex: flashIndex.value,
         flashFilter: flashFilter.value,
-        knownMap: knownMap.value,
+        schedule: scheduleRef.value,
         grading: grading.value
       });
     };
 
     watch([view, theme, accent, activeQuizId, flashIndex, flashFilter,
-           mcAnswers, shortAnswers, shortRevealed, knownMap, grading], () => { persist(); }, { deep: true });
+           mcAnswers, shortAnswers, shortRevealed, scheduleRef, grading], () => { persist(); }, { deep: true });
     watch([theme, accent], applyTweaks, { immediate: true });
     watch(flashFilter, () => { flashIndex.value = 0; flipped.value = false; });
     watch(view, () => { flipped.value = false; });
@@ -366,6 +412,10 @@ Avalie:`;
           if (e.key === 'ArrowRight') nextFlash();
           if (e.key === 'ArrowLeft') prevFlash();
           if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flipped.value = !flipped.value; }
+          if (e.key === '1') rateFlash('again');
+          if (e.key === '2') rateFlash('hard');
+          if (e.key === '3') rateFlash('good');
+          if (e.key === '4') rateFlash('easy');
         }
       });
     });
@@ -379,7 +429,8 @@ Avalie:`;
       shortKey, quizAnswered, quizProgress, answerMc, revealShort, optionClass,
       grading, gradingLoading, gradeShort, gradingStyle,
       flashIndex, flashFilter, flipped, knownMap, knownCount,
-      visibleFlashcards, currentFlash, prevFlash, nextFlash, markFlash,
+      scheduleRef, scheduleFor, lastReviewLabel,
+      visibleFlashcards, currentFlash, prevFlash, nextFlash, rateFlash,
       navItems, goto, t, renderMd, renderMdInline,
       titleDisplay, shortRepo,
       moduleTintStyle

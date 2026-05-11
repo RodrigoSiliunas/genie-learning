@@ -401,9 +401,13 @@
         </header>
 
         <div class="flex flex-wrap items-center justify-between gap-4 mb-7">
-          <div class="seg">
-            <button @click="flashFilter = 'all'" :class="{'is-active': flashFilter === 'all'}">{{ t('show_all') }}</button>
-            <button @click="flashFilter = 'unknown'" :class="{'is-active': flashFilter === 'unknown'}">{{ t('show_only_unknown') }}</button>
+          <div class="flex flex-wrap items-center gap-3">
+            <span class="font-mono text-[11px] text-[var(--muted)]">{{ lastReviewLabel }}</span>
+            <div class="seg">
+              <button @click="flashFilter = 'all'" :class="{'is-active': flashFilter === 'all'}">{{ t('show_all') }}</button>
+              <button @click="flashFilter = 'unknown'" :class="{'is-active': flashFilter === 'unknown'}">{{ t('show_only_unknown') }}</button>
+            </div>
+            </div>
           </div>
           <div class="font-mono text-[12px] text-[var(--muted)]">
             <span class="text-[var(--ink)] font-medium">{{ knownCount }}</span> / {{ data.flashcards.length }} {{ t('known_marker') }}
@@ -441,12 +445,18 @@
               <svg class="icon" width="14" height="14" viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
               {{ t('previous') }}
             </button>
-            <div class="flex gap-3">
-              <button class="btn btn-ghost" @click="markFlash(false)" :style="{borderColor: 'var(--wrong)', color: 'var(--wrong)'}">
-                {{ t('didnt_know') }}
+            <div class="flex gap-2">
+              <button class="btn btn-ghost" style="border-color:var(--wrong);color:var(--wrong)" @click="rateFlash('again')" :title="'1'">
+                {{ t('again') }}<span class="font-mono text-[10px] opacity-60 ml-1">(10m)</span>
               </button>
-              <button class="btn btn-accent" @click="markFlash(true)">
-                {{ t('knew_it') }}
+              <button class="btn btn-ghost" style="border-color:var(--muted);color:var(--muted)" @click="rateFlash('hard')" :title="'2'">
+                {{ t('hard') }}<span class="font-mono text-[10px] opacity-60 ml-1">({{ previewInterval('hard', scheduleFor(currentFlash)) === DAY_MS ? '1d' : Math.round(previewInterval('hard', scheduleFor(currentFlash))/DAY_MS)+'d' }})</span>
+              </button>
+              <button class="btn" @click="rateFlash('good')" :title="'3'">
+                {{ t('good') }}<span class="font-mono text-[10px] opacity-60 ml-1">({{ previewInterval('good', scheduleFor(currentFlash)) === DAY_MS ? '1d' : previewInterval('good', scheduleFor(currentFlash)) === 3*DAY_MS ? '3d' : Math.round(previewInterval('good', scheduleFor(currentFlash))/DAY_MS)+'d' }})</span>
+              </button>
+              <button class="btn btn-accent" @click="rateFlash('easy')" :title="'4'">
+                {{ t('easy') }}<span class="font-mono text-[10px] opacity-60 ml-1">({{ previewInterval('easy', scheduleFor(currentFlash)) === 4*DAY_MS ? '4d' : Math.round(previewInterval('easy', scheduleFor(currentFlash))/DAY_MS)+'d' }})</span>
               </button>
             </div>
             <button class="btn btn-ghost" @click="nextFlash" :disabled="visibleFlashcards.length < 2">
