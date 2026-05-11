@@ -336,6 +336,58 @@ Avalie:`;
       }
     };
 
+    /* ---------- Export/import progress ---------- */
+    const exportProgress = () => {
+      const state = loadState();
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${STORAGE_KEY}-progress.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    const importProgress = () => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+      input.onchange = () => {
+        const file = input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const state = JSON.parse(e.target.result);
+            saveState(state);
+            // Reload current session state from the imported data
+            const reloaded = loadState();
+            if (reloaded.view) view.value = reloaded.view;
+            if (reloaded.theme) theme.value = reloaded.theme;
+            if (reloaded.accent) accent.value = reloaded.accent;
+            if (reloaded.activeQuizId) activeQuizId.value = reloaded.activeQuizId;
+            if (reloaded.mcAnswers) mcAnswers.value = reloaded.mcAnswers;
+            if (reloaded.shortAnswers) shortAnswers.value = reloaded.shortAnswers;
+            if (reloaded.shortRevealed) shortRevealed.value = reloaded.shortRevealed;
+            if (reloaded.flashIndex != null) flashIndex.value = reloaded.flashIndex;
+            if (reloaded.flashFilter) flashFilter.value = reloaded.flashFilter;
+            if (reloaded.knownMap) knownMap.value = reloaded.knownMap;
+            if (reloaded.grading) grading.value = reloaded.grading;
+            // Flash a brief confirmation
+            const banner = document.createElement('div');
+            banner.textContent = '✓ Progresso importado com sucesso';
+            banner.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--accent);color:var(--accent-ink);padding:12px 24px;border-radius:12px;font-size:14px;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.15);transition:opacity 0.3s';
+            document.body.appendChild(banner);
+            setTimeout(() => { banner.style.opacity = '0'; setTimeout(() => banner.remove(), 300); }, 2000);
+          } catch {
+            alert('Falha ao importar progresso: arquivo JSON inválido.');
+          }
+        };
+        reader.readAsText(file);
+      };
+      input.click();
+    };
+
     /* ---------- Apply tweaks to <html> ---------- */
     const applyTweaks = () => {
       const root = document.documentElement;
@@ -408,7 +460,8 @@ Avalie:`;
       visibleFlashcards, currentFlash, prevFlash, nextFlash, markFlash,
       navItems, goto, t, renderMd, renderMdInline,
       titleDisplay, shortRepo, readTime,
-      moduleTintStyle
+      moduleTintStyle,
+      exportProgress, importProgress
     };
   }
 });

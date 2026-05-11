@@ -518,7 +518,11 @@
         {{ t('footer_built') }}
         <a href="#" class="text-[var(--ink)] hover:text-[var(--accent)] underline decoration-[var(--hairline-2)] underline-offset-2">Genie Learning</a>
       </div>
-      <div class="font-mono">{{ data.owner_name }} · v{{ data.schema_version }}</div>
+      <div class="flex items-center gap-4">
+        <button @click="exportProgress" class="hover:text-[var(--ink)] underline decoration-[var(--hairline-2)] underline-offset-2">Export progress</button>
+        <button @click="importProgress" class="hover:text-[var(--ink)] underline decoration-[var(--hairline-2)] underline-offset-2">Import progress</button>
+        <span class="font-mono">{{ data.owner_name }} · v{{ data.schema_version }}</span>
+      </div>
     </div>
   </footer>
 
