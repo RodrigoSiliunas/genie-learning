@@ -318,6 +318,17 @@
           <p class="text-[15px] text-[var(--muted)] max-w-[55ch]">{{ t('quizzes_subtitle') }}</p>
         </header>
 
+        <!-- Calibration banner -->
+        <div v-if="Object.keys(calibrationStats).length" class="mb-8 p-4 rounded-xl border hairline text-[13px] flex flex-wrap items-center gap-x-2 gap-y-1" :title="t('calibration_tooltip')">
+          <span class="font-medium text-[var(--ink)]">{{ t('calibration_label') }}</span>
+          <template v-for="(b, level) in calibrationStats" :key="level">
+            <span :style="{color: level <= 2 ? 'var(--wrong)' : level >= 4 ? 'var(--correct)' : 'var(--muted)'}">
+              {{ level }}: {{ b.pct }}%
+            </span>
+            <span v-if="level < 5" class="opacity-30">·</span>
+          </template>
+        </div>
+
         <!-- quiz pills -->
         <div class="flex flex-wrap gap-2 mb-10">
           <button v-for="q in data.quizzes" :key="q.id"
@@ -342,6 +353,17 @@
 
               <!-- MC -->
               <template v-if="q.kind === 'mc'">
+                <!-- Confidence rating -->
+                <div v-if="!quizAnswered(activeQuiz.id, qi)" class="flex flex-wrap items-center gap-2 mb-4">
+                  <span class="font-mono text-[11px] text-[var(--muted)] mr-1">{{ t('confidence_label') }}</span>
+                  <button v-for="lvl in 5" :key="lvl"
+                          class="px-3 py-1 rounded-md border text-[12px] font-mono transition-colors"
+                          :class="mcConfidence[shortKey(activeQuiz.id, qi)] === lvl ? 'bg-[var(--ink)] text-[var(--paper)] border-[var(--ink)]' : 'hairline text-[var(--muted)] hover:border-[var(--ink)] hover:text-[var(--ink)]'"
+                          @click="mcConfidence = {...mcConfidence, [shortKey(activeQuiz.id, qi)]: lvl}">
+                    {{ lvl }}
+                  </button>
+                  <span class="font-mono text-[10px] text-[var(--muted)] ml-1">{{ mcConfidence[shortKey(activeQuiz.id, qi)] === 1 ? t('confidence_hint_low') : mcConfidence[shortKey(activeQuiz.id, qi)] === 5 ? t('confidence_hint_high') : '' }}</span>
+                </div>
                 <div class="space-y-2.5">
                   <button v-for="opt in q.options" :key="opt.key"
                           class="quiz-opt"

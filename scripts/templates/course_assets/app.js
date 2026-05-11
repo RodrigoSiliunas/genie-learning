@@ -62,7 +62,8 @@ const app = createApp({
     const glossaryQuery = ref('');
 
     const activeQuizId = ref(persisted.activeQuizId || (data.value.quizzes[0] && data.value.quizzes[0].id) || null);
-    const mcAnswers = ref(persisted.mcAnswers || {});         // { quizId: { qi: 'B' } }
+    const mcAnswers = ref(persisted.mcAnswers || {});         // { quizId: { qi: { answer: 'B', confidence: 4|null } } }
+    const mcConfidence = ref({});                              // { 'quizId:qi': number } — ephemeral before submit
     const shortAnswers = ref(persisted.shortAnswers || {});   // { 'quizId:qi': text }
     const shortRevealed = ref(persisted.shortRevealed || {}); // { 'quizId:qi': true }
 
@@ -182,7 +183,10 @@ const app = createApp({
 
     const activeQuiz = computed(() => data.value.quizzes.find(q => q.id === activeQuizId.value));
     const shortKey = (qid, qi) => `${qid}:${qi}`;
-    const quizAnswered = (qid, qi) => !!(mcAnswers.value[qid] && mcAnswers.value[qid][qi]);
+    const quizAnswered = (qid, qi) => {
+      const entry = mcAnswers.value[qid] && mcAnswers.value[qid][qi];
+      return !!(entry && (typeof entry === 'string' || entry.answer));
+    };
 
     const scrollToQuestion = (qi) => {
       // Scroll the answered question card into view after a brief delay for Vue re-render
@@ -198,7 +202,8 @@ const app = createApp({
       let trace = 0;
       q.questions.forEach((qq, qi) => {
         if (qq.kind === 'mc') {
-          if (mcAnswers.value[q.id] && mcAnswers.value[q.id][qi]) answered++;
+          const entry = mcAnswers.value[q.id] && mcAnswers.value[q.id][qi];
+          if (entry && (typeof entry === 'string' || entry.answer)) answered++;
         } else if (qq.kind === 'short') {
           if (shortRevealed.value[shortKey(q.id, qi)]) answered++;
         } else {
@@ -212,7 +217,8 @@ const app = createApp({
     const answerMc = (qid, qi, key) => {
       if (!mcAnswers.value[qid]) mcAnswers.value[qid] = {};
       if (mcAnswers.value[qid][qi]) return;
-      mcAnswers.value[qid] = { ...mcAnswers.value[qid], [qi]: key };
+      const conf = mcConfidence.value[shortKey(qid, qi)] || null;
+      mcAnswers.value[qid] = { ...mcAnswers.value[qid], [qi]: { answer: key, confidence: conf } };
       scrollToQuestion(qi);
     };
 
@@ -222,7 +228,8 @@ const app = createApp({
     };
 
     const optionClass = (qid, qi, q, opt) => {
-      const userAns = mcAnswers.value[qid] && mcAnswers.value[qid][qi];
+      const userEntry = mcAnswers.value[qid] && mcAnswers.value[qid][qi];
+      const userAns = userEntry && (typeof userEntry === 'string' ? userEntry : userEntry.answer);
       if (!userAns) return '';
       if (opt.key === q.answer_key) return 'is-correct';
       if (opt.key === userAns) return 'is-wrong';
@@ -238,6 +245,30 @@ const app = createApp({
         borderColor: 'transparent'
       };
     };
+    /* ---------- Calibration ---------- */
+    const calibrationStats = computed(() => {
+      const buckets = { 1: { total: 0, correct: 0 }, 2: { total: 0, correct: 0 }, 3: { total: 0, correct: 0 }, 4: { total: 0, correct: 0 }, 5: { total: 0, correct: 0 } };
+      for (const qid in mcAnswers.value) {
+        const quiz = data.value.quizzes.find(q => q.id === qid);
+        if (!quiz) continue;
+        for (const qi in mcAnswers.value[qid]) {
+          const entry = mcAnswers.value[qid][qi];
+          const conf = typeof entry === 'object' && entry != null ? entry.confidence : null;
+          if (conf == null || conf < 1 || conf > 5) continue;
+          const ans = typeof entry === 'string' ? entry : entry.answer;
+          buckets[conf].total++;
+          const qq = quiz.questions[parseInt(qi)];
+          if (qq && qq.answer_key && ans === qq.answer_key) buckets[conf].correct++;
+        }
+      }
+      const visible = {};
+      for (let i = 1; i <= 5; i++) {
+        if (buckets[i].total >= 3) {
+          visible[i] = { ...buckets[i], pct: Math.round(buckets[i].correct / buckets[i].total * 100) };
+        }
+      }
+      return visible;
+    });
 
     /* ---------- Flashcards ---------- */
     const flashHash = (f) => f.source + ':' + (f.anchor || f.front);
@@ -516,7 +547,18 @@ Avalie:`;
             if (reloaded.theme) theme.value = reloaded.theme;
             if (reloaded.accent) accent.value = reloaded.accent;
             if (reloaded.activeQuizId) activeQuizId.value = reloaded.activeQuizId;
-            if (reloaded.mcAnswers) mcAnswers.value = reloaded.mcAnswers;
+            if (reloaded.mcAnswers) {
+              // Migrate legacy string format to object format
+              const migrated = {};
+              for (const qid in reloaded.mcAnswers) {
+                migrated[qid] = {};
+                for (const qi in reloaded.mcAnswers[qid]) {
+                  const entry = reloaded.mcAnswers[qid][qi];
+                  migrated[qid][qi] = typeof entry === 'string' ? { answer: entry, confidence: null } : entry;
+                }
+              }
+              mcAnswers.value = migrated;
+            }
             if (reloaded.shortAnswers) shortAnswers.value = reloaded.shortAnswers;
             if (reloaded.shortRevealed) shortRevealed.value = reloaded.shortRevealed;
             if (reloaded.flashIndex != null) flashIndex.value = reloaded.flashIndex;
@@ -612,6 +654,21 @@ Avalie:`;
           if (e.key === '3') rateFlash('good');
           if (e.key === '4') rateFlash('easy');
         }
+        // Confidence shortcut on quiz section — set confidence for first unanswered MC
+        if (view.value === 'quizzes' && activeQuiz.value) {
+          const num = parseInt(e.key);
+          if (num >= 1 && num <= 5) {
+            for (const q of activeQuiz.value.questions) {
+              if (q.kind === 'mc') {
+                const qi = activeQuiz.value.questions.indexOf(q);
+                if (!quizAnswered(activeQuiz.value.id, qi)) {
+                  mcConfidence.value = {...mcConfidence.value, [shortKey(activeQuiz.value.id, qi)]: num};
+                  break;
+                }
+              }
+            }
+          }
+        }
         // Single-key section navigation (not pressed during input editing)
         if (!e.metaKey && !e.ctrlKey && !e.altKey) {
           if (e.key === 'o') goto('overview');
@@ -633,6 +690,7 @@ Avalie:`;
       activeQuizId, activeQuiz, mcAnswers, shortAnswers, shortRevealed,
       shortKey, quizAnswered, quizProgress, answerMc, revealShort, optionClass,
       grading, gradingLoading, gradeShort, gradingStyle,
+      mcConfidence, calibrationStats,
       flashIndex, flashFilter, flashSourceFilter, flipped, knownMap, knownCount,
       scheduleRef, scheduleFor, lastReviewLabel, previewInterval, DAY_MS,
       filterCounts, emptyDueLabel,
