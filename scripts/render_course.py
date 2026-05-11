@@ -770,6 +770,7 @@ def main(argv: list[str]) -> int:
     print(f"Wrote {output_path} ({size_kb:.1f} KB) + assets/ ({assets_size_kb:.1f} KB)")
     print(f"Modules: {n_modules} | Quizzes: {n_quizzes} | Glossary terms: {n_terms} | Flashcards: {n_cards} | Audio: {audio_status}")
     print(f"Open with: file:///{output_path.as_posix()}")
+    print(f"Copy path: {output_path}")
     return 0
 
 
