@@ -359,13 +359,24 @@
                           :placeholder="t('your_answer')"
                           rows="3"
                           class="w-full p-4 rounded-xl border hairline bg-[var(--paper-2)] text-[14.5px] leading-relaxed focus:outline-none focus:border-[var(--ink)]"></textarea>
-                <div class="mt-4 flex items-center gap-3">
+                <div class="mt-4 flex items-center gap-3 flex-wrap">
                   <button class="btn btn-primary" @click="revealShort(activeQuiz.id, qi)">{{ t('reveal_answer') }}</button>
-                  <span v-if="shortRevealed[shortKey(activeQuiz.id, qi)]" class="text-[12.5px] text-[var(--muted)] font-mono">— answered</span>
+                  <button v-if="shortAnswers[shortKey(activeQuiz.id, qi)]"
+                          class="btn btn-accent"
+                          @click="gradeShort(activeQuiz.id, qi)"
+                          :disabled="gradingLoading[shortKey(activeQuiz.id, qi)]">
+                    <template v-if="gradingLoading[shortKey(activeQuiz.id, qi)]">⏳ Corrigindo...</template>
+                    <template v-else>🧠 Corrigir com IA</template>
+                  </button>
                 </div>
                 <div v-if="shortRevealed[shortKey(activeQuiz.id, qi)]" class="reveal-in mt-5 p-5 rounded-xl border hairline" :style="{background: 'var(--paper-2)'}">
                   <div class="eyebrow mb-2">{{ t('reference_answer') }}</div>
                   <div class="prose-mini" v-html="renderMd(q.answer)"></div>
+                </div>
+                <div v-if="grading[shortKey(activeQuiz.id, qi)]"
+                     class="reveal-in mt-5 p-5 rounded-xl border"
+                     :style="gradingStyle(shortKey(activeQuiz.id, qi))"
+                     v-html="grading[shortKey(activeQuiz.id, qi)]">
                 </div>
               </template>
 
@@ -539,6 +550,7 @@
 <script>
 /* Boot — payload injected by scripts/render_course.py as base64. App logic lives in assets/app.js. */
 window.__COURSE_DATA = JSON.parse(new TextDecoder('utf-8').decode(Uint8Array.from(atob("/* GENIE_DATA */"), c => c.charCodeAt(0))));
+window.__GRADER_KEY = "/* GENIE_GRADER_KEY */";
 </script>
 <script src="assets/app.js?v=__GENIE_ASSET_VERSION__"></script>
 </body>
