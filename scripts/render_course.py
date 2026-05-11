@@ -747,6 +747,9 @@ def main(argv: list[str]) -> int:
     if not content_dir.is_dir():
         print(f"error: course directory not found: {content_dir}", file=sys.stderr)
         print(f"hint: run /genie-learn first to generate content/{args.owner_name}/", file=sys.stderr)
+        if not content_dir.parent.is_dir():
+            print(f"note: the content/ directory itself does not exist at {content_dir.parent}", file=sys.stderr)
+            print(f"      create it with: mkdir -p content/{args.owner_name}", file=sys.stderr)
         return 2
     if not template_path.is_file():
         print(f"error: template not found: {template_path}", file=sys.stderr)
