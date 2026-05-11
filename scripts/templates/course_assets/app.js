@@ -67,7 +67,7 @@ const app = createApp({
     const shortRevealed = ref(persisted.shortRevealed || {}); // { 'quizId:qi': true }
 
     const flashIndex = ref(persisted.flashIndex || 0);
-    const flashFilter = ref(persisted.flashFilter || 'all');
+    const flashFilter = ref(persisted.flashFilter === 'unknown' ? 'new' : (persisted.flashFilter || 'due'));
     const flashSourceFilter = ref(persisted.flashSourceFilter || 'all');
     const flipped = ref(false);
     /* schedule state — migrate from legacy knownMap if needed */
@@ -245,9 +245,32 @@ const app = createApp({
 
     const visibleFlashcards = computed(() => {
       let cards = data.value.flashcards;
-      // Known/unknown filter
-      if (flashFilter.value === 'unknown') {
-        cards = cards.filter(f => !knownMap.value[flashHash(f)]);
+      // Schedule-based filter
+      if (flashFilter.value === 'due') {
+        cards = cards.filter(f => {
+          const s = scheduleRef.value[flashHash(f)];
+          return !s || s.reps === 0 || s.due <= Date.now();
+        });
+        cards.sort((a, b) => {
+          const sa = scheduleRef.value[flashHash(a)];
+          const sb = scheduleRef.value[flashHash(b)];
+          return (sa ? sa.due : Date.now()) - (sb ? sb.due : Date.now());
+        });
+      } else if (flashFilter.value === 'new') {
+        cards = cards.filter(f => {
+          const s = scheduleRef.value[flashHash(f)];
+          return !s || s.reps === 0;
+        });
+      } else if (flashFilter.value === 'learning') {
+        cards = cards.filter(f => {
+          const s = scheduleRef.value[flashHash(f)];
+          return s && s.reps > 0 && s.reps < 2;
+        });
+      } else if (flashFilter.value === 'mature') {
+        cards = cards.filter(f => {
+          const s = scheduleRef.value[flashHash(f)];
+          return s && s.reps >= 2 && s.interval >= 21 * DAY_MS;
+        });
       }
       // Source filter
       if (flashSourceFilter.value !== 'all') {
@@ -272,6 +295,33 @@ const app = createApp({
       const days = Math.floor(diff / DAY_MS);
       if (days === 1) return t('last_review_yesterday');
       return t('last_review_days_ago').replace('{n}', days);
+    });
+    const filterCounts = computed(() => {
+      let due = 0, nw = 0, learning = 0, mature = 0;
+      const now = Date.now();
+      for (const f of data.value.flashcards) {
+        const h = flashHash(f);
+        const s = scheduleRef.value[h];
+        if (!s || s.reps === 0 || s.due <= now) due++;
+        if (!s || s.reps === 0) nw++;
+        else if (s.reps < 2) learning++;
+        else if (s.interval >= 21 * DAY_MS) mature++;
+        else learning++;
+      }
+      return { due, new: nw, learning, mature, total: data.value.flashcards.length };
+    });
+    const emptyDueLabel = computed(() => {
+      if (filterCounts.value.due > 0) return '';
+      let minDue = Infinity;
+      const now = Date.now();
+      for (const f of data.value.flashcards) {
+        const h = flashHash(f);
+        const s = scheduleRef.value[h];
+        if (s && s.due > now && s.due < minDue) minDue = s.due;
+      }
+      if (minDue === Infinity) return t('empty_due').replace('{n}', '—');
+      const hours = Math.ceil((minDue - now) / 3600000);
+      return t('empty_due').replace('{n}', Math.max(1, hours));
     });
 
     const prevFlash = () => {
@@ -583,6 +633,7 @@ Avalie:`;
       grading, gradingLoading, gradeShort, gradingStyle,
       flashIndex, flashFilter, flashSourceFilter, flipped, knownMap, knownCount,
       scheduleRef, scheduleFor, lastReviewLabel, previewInterval, DAY_MS,
+      filterCounts, emptyDueLabel,
       visibleFlashcards, currentFlash, prevFlash, nextFlash, rateFlash,
       shuffleFlashcards, resetOrder,
       navItems, goto, t, renderMd, renderMdInline,
