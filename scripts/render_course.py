@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Render a generated Genie Learning course as an interactive HTML bundle.
 
 Reads `content/<owner>-<name>/` produced by /genie-learn and writes a 3-file
@@ -37,6 +38,7 @@ from typing import Any
 ASSET_FILES: tuple[str, ...] = ("style.css", "app.js")
 ASSET_VERSION_PLACEHOLDER = "__GENIE_ASSET_VERSION__"
 DATA_PLACEHOLDER = "/* GENIE_DATA */"
+VERSION = "1.1.0"
 GRADER_KEY_PLACEHOLDER = "/* GENIE_GRADER_KEY */"
 
 # ---------------------------------------------------------------------------
@@ -729,7 +731,13 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--output-dir", default=None, help="Directory to write index.html (and assets/) into (default: content/<owner_name>/).")
     parser.add_argument("--check", action="store_true", help="Validate the course without writing HTML or assets.")
     parser.add_argument("--list-courses", action="store_true", help="List available courses in content/.")
+    parser.add_argument("--quiet", action="store_true", help="Suppress informational stdout (errors still go to stderr).")
+    parser.add_argument("--version", action="store_true", help="Print version and exit.")
     args = parser.parse_args(argv)
+
+    if args.version:
+        print(VERSION)
+        return 0
 
     project_root = Path(args.project_root) if args.project_root else Path(__file__).resolve().parent.parent
     content_base = project_root / "content"
@@ -774,24 +782,34 @@ def main(argv: list[str]) -> int:
         n_cards = len(course_data["flashcards"])
         n_terms = sum(len(letter["terms"]) for letter in course_data["glossary"])
         audio_status = "yes" if course_data["podcast"]["audio_file"] else "no"
-        print(f"check: course '{args.owner_name}' is valid")
-        print(f"Modules: {n_modules} | Quizzes: {n_quizzes} | Glossary terms: {n_terms} | Flashcards: {n_cards} | Audio: {audio_status}")
+        info = print if not args.quiet else (lambda *a, **kw: None)
+        info(f"check: course '{args.owner_name}' is valid")
+        info(f"Modules: {n_modules} | Quizzes: {n_quizzes} | Glossary terms: {n_terms} | Flashcards: {n_cards} | Audio: {audio_status}")
+
+        warnings = 0
+        for q in course_data["quizzes"]:
+            if len(q["questions"]) == 0:
+                info(f"  warning: quiz '{q['id']}' has 0 questions (missing or malformed ## Perguntas/## Questions heading?)")
+                warnings += 1
+        if warnings:
+            info(f"  ({warnings} warning(s) — course will still render, missing quizzes will be skipped)")
         return 0
 
     render(template_path, course_data, output_path, project_root)
 
-    size_kb = output_path.stat().st_size / 1024
-    assets_dir = output_path.parent / "assets"
-    assets_size_kb = sum(p.stat().st_size for p in assets_dir.iterdir() if p.is_file()) / 1024
-    n_modules = len(course_data["modules"])
-    n_quizzes = len(course_data["quizzes"])
-    n_cards = len(course_data["flashcards"])
-    n_terms = sum(len(letter["terms"]) for letter in course_data["glossary"])
-    audio_status = "yes" if course_data["podcast"]["audio_file"] else "no"
+    if not args.quiet:
+        size_kb = output_path.stat().st_size / 1024
+        assets_dir = output_path.parent / "assets"
+        assets_size_kb = sum(p.stat().st_size for p in assets_dir.iterdir() if p.is_file()) / 1024
+        n_modules = len(course_data["modules"])
+        n_quizzes = len(course_data["quizzes"])
+        n_cards = len(course_data["flashcards"])
+        n_terms = sum(len(letter["terms"]) for letter in course_data["glossary"])
+        audio_status = "yes" if course_data["podcast"]["audio_file"] else "no"
 
-    print(f"Wrote {output_path} ({size_kb:.1f} KB) + assets/ ({assets_size_kb:.1f} KB)")
-    print(f"Modules: {n_modules} | Quizzes: {n_quizzes} | Glossary terms: {n_terms} | Flashcards: {n_cards} | Audio: {audio_status}")
-    print(f"Open with: file:///{output_path.as_posix()}")
+        print(f"Wrote {output_path} ({size_kb:.1f} KB) + assets/ ({assets_size_kb:.1f} KB)")
+        print(f"Modules: {n_modules} | Quizzes: {n_quizzes} | Glossary terms: {n_terms} | Flashcards: {n_cards} | Audio: {audio_status}")
+        print(f"Open with: file:///{output_path.as_posix()}")
     return 0
 
 
