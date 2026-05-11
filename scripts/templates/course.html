@@ -342,11 +342,11 @@
         <!-- Calibration banner -->
         <div v-if="Object.keys(calibrationStats).length" class="mb-8 p-4 rounded-xl border hairline text-[13px] flex flex-wrap items-center gap-x-2 gap-y-1" :title="t('calibration_tooltip')">
           <span class="font-medium text-[var(--ink)]">{{ t('calibration_label') }}</span>
-          <template v-for="(b, level) in calibrationStats" :key="level">
+          <template v-for="(b, level, idx) in calibrationStats" :key="level">
             <span :style="{color: level <= 2 ? 'var(--wrong)' : level >= 4 ? 'var(--correct)' : 'var(--muted)'}">
               {{ level }}: {{ b.pct }}%
             </span>
-            <span v-if="level < 5" class="opacity-30">·</span>
+            <span v-if="idx < Object.keys(calibrationStats).length - 1" class="opacity-30">·</span>
           </template>
         </div>
 
