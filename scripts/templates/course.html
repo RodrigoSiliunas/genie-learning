@@ -408,9 +408,9 @@
         <div class="flex flex-wrap items-center justify-between gap-4 mb-7">
           <div class="flex flex-wrap items-center gap-3">
             <div class="font-mono text-[11px] text-[var(--muted)]">
-              <span class="text-[var(--ink)] font-medium">{{ filterCounts.due }}</span> due<span class="opacity-40"> · </span>
-              <span class="text-[var(--ink)] font-medium">{{ filterCounts.new }}</span> new<span class="opacity-40"> · </span>
-              <span class="text-[var(--muted)]">{{ filterCounts.total }}</span> total
+              <span class="text-[var(--ink)] font-medium">{{ filterCounts.due }}</span> {{ t('lbl_due') }}<span class="opacity-40"> · </span>
+              <span class="text-[var(--ink)] font-medium">{{ filterCounts.new }}</span> {{ t('lbl_new') }}<span class="opacity-40"> · </span>
+              <span class="text-[var(--muted)]">{{ filterCounts.total }}</span> {{ t('lbl_total') }}
             </div>
             <span class="font-mono text-[11px] text-[var(--muted)] opacity-60">{{ lastReviewLabel }}</span>
             <div class="seg">

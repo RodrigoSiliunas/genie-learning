@@ -262,9 +262,11 @@ const app = createApp({
           return !s || s.reps === 0;
         });
       } else if (flashFilter.value === 'learning') {
+        // Reviewed but not yet mature — mirrors filterCounts so card never lands "between" buckets.
         cards = cards.filter(f => {
           const s = scheduleRef.value[flashHash(f)];
-          return s && s.reps > 0 && s.reps < 2;
+          if (!s || s.reps === 0) return false;
+          return !(s.reps >= 2 && s.interval >= 21 * DAY_MS);
         });
       } else if (flashFilter.value === 'mature') {
         cards = cards.filter(f => {
