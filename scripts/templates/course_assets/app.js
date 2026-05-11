@@ -351,6 +351,13 @@ Avalie:`;
     watch([theme, accent], applyTweaks, { immediate: true });
     watch(flashFilter, () => { flashIndex.value = 0; flipped.value = false; });
     watch(view, () => { flipped.value = false; });
+    watch(activeQuizId, () => {
+      // Scroll to the quiz section on quiz switch
+      setTimeout(() => {
+        const el = document.querySelector('.view-enter');
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 50);
+    });
 
     onMounted(() => {
       applyTweaks();
