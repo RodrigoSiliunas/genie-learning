@@ -191,6 +191,8 @@ const app = createApp({
 
     /* ---------- Flashcards ---------- */
     const flashHash = (f) => f.source + ':' + (f.anchor || f.front);
+    const flashOrder = ref(persisted.flashOrder || null); // null = original order, array = shuffled indices
+
     const visibleFlashcards = computed(() => {
       let cards = data.value.flashcards;
       // Known/unknown filter
@@ -200,6 +202,10 @@ const app = createApp({
       // Source filter
       if (flashSourceFilter.value !== 'all') {
         cards = cards.filter(f => f.source === flashSourceFilter.value);
+      }
+      // Apply shuffled order if active and consistent with current filter length
+      if (flashOrder.value && flashOrder.value.length === cards.length) {
+        cards = flashOrder.value.map(i => cards[i]);
       }
       return cards;
     });
@@ -224,6 +230,24 @@ const app = createApp({
       if (known) m[h] = true; else delete m[h];
       knownMap.value = m;
       nextFlash();
+    };
+
+    const shuffleFlashcards = () => {
+      const indices = Array.from({ length: data.value.flashcards.length }, (_, i) => i);
+      // Fisher-Yates shuffle
+      for (let i = indices.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [indices[i], indices[j]] = [indices[j], indices[i]];
+      }
+      flashOrder.value = indices;
+      flashIndex.value = 0;
+      flipped.value = false;
+    };
+
+    const resetOrder = () => {
+      flashOrder.value = null;
+      flashIndex.value = 0;
+      flipped.value = false;
     };
 
     /* ---------- Short-answer AI grading ---------- */
@@ -421,6 +445,7 @@ Avalie:`;
         flashIndex: flashIndex.value,
         flashFilter: flashFilter.value,
         flashSourceFilter: flashSourceFilter.value,
+        flashOrder: flashOrder.value,
         knownMap: knownMap.value,
         grading: grading.value
       });
@@ -480,6 +505,7 @@ Avalie:`;
       grading, gradingLoading, gradeShort, gradingStyle,
       flashIndex, flashFilter, flashSourceFilter, flipped, knownMap, knownCount,
       visibleFlashcards, currentFlash, prevFlash, nextFlash, markFlash,
+      shuffleFlashcards, resetOrder,
       navItems, goto, t, renderMd, renderMdInline,
       titleDisplay, shortRepo, readTime,
       moduleTintStyle,

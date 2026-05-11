@@ -416,6 +416,10 @@
               <button @click="flashSourceFilter = 'glossary'" :class="{'is-active': flashSourceFilter === 'glossary'}">{{ t('term_label') }}</button>
               <button @click="flashSourceFilter = 'quiz'" :class="{'is-active': flashSourceFilter === 'quiz'}">{{ t('question_label') }}</button>
             </div>
+            <div class="seg">
+              <button @click="shuffleFlashcards" :class="{'is-active': flashOrder !== null}">{{ t('shuffle') }}</button>
+              <button v-if="flashOrder !== null" @click="resetOrder" class="text-[var(--muted)] hover:text-[var(--ink)]">{{ t('reset') }}</button>
+            </div>
           </div>
           <div class="font-mono text-[12px] text-[var(--muted)]">
             <span class="text-[var(--ink)] font-medium">{{ knownCount }}</span> / {{ data.flashcards.length }} {{ t('known_marker') }}
