@@ -736,6 +736,7 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--project-root", default=None, help="Project root (default: parent of scripts/).")
     parser.add_argument("--output-dir", default=None, help="Directory to write index.html (and assets/) into (default: content/<owner_name>/).")
     parser.add_argument("--check", action="store_true", help="Validate the course without writing HTML or assets.")
+    parser.add_argument("--list-courses", action="store_true", help="List available courses in content/.")
     parser.add_argument("--quiet", action="store_true", help="Suppress informational stdout (errors still go to stderr).")
     parser.add_argument("--version", action="store_true", help="Print version and exit.")
     args = parser.parse_args(argv)
@@ -745,7 +746,28 @@ def main(argv: list[str]) -> int:
         return 0
 
     project_root = Path(args.project_root) if args.project_root else Path(__file__).resolve().parent.parent
-    content_dir = project_root / "content" / args.owner_name
+    content_base = project_root / "content"
+
+    if args.list_courses:
+        if not content_base.is_dir():
+            print("No courses found — content/ directory does not exist.", file=sys.stderr)
+            return 1
+        courses = sorted(d.name for d in content_base.iterdir() if d.is_dir())
+        if not courses:
+            print("No courses found in content/.", file=sys.stderr)
+            return 1
+        print(f"Courses ({len(courses)}):")
+        for name in courses:
+            overview = content_base / name / "00-overview.md"
+            title = ""
+            if overview.is_file():
+                m = H1_RE.search(overview.read_text(encoding="utf-8"))
+                if m:
+                    title = f"  — {m.group(1).strip()}"
+            print(f"  {name}{title}")
+        return 0
+
+    content_dir = content_base / args.owner_name
     template_path = project_root / "scripts" / "templates" / "course.html"
     output_path = (Path(args.output_dir) if args.output_dir else content_dir) / "index.html"
     output_path.parent.mkdir(parents=True, exist_ok=True)
