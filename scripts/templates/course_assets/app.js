@@ -367,6 +367,16 @@ Avalie:`;
           if (e.key === 'ArrowLeft') prevFlash();
           if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flipped.value = !flipped.value; }
         }
+        // Single-key section navigation (not pressed during input editing)
+        if (!e.metaKey && !e.ctrlKey && !e.altKey) {
+          if (e.key === 'o') goto('overview');
+          else if (e.key === 't') goto('tutorial');
+          else if (e.key === 'm') goto('modules');
+          else if (e.key === 'g') goto('glossary');
+          else if (e.key === 'q') goto('quizzes');
+          else if (e.key === 'f') goto('flashcards');
+          else if (e.key === 'p') goto('podcast');
+        }
       });
     });
 
