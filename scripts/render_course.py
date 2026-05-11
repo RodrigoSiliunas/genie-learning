@@ -37,6 +37,7 @@ from typing import Any
 ASSET_FILES: tuple[str, ...] = ("style.css", "app.js")
 ASSET_VERSION_PLACEHOLDER = "__GENIE_ASSET_VERSION__"
 DATA_PLACEHOLDER = "/* GENIE_DATA */"
+VERSION = "1.1.0"
 GRADER_KEY_PLACEHOLDER = "/* GENIE_GRADER_KEY */"
 
 # ---------------------------------------------------------------------------
@@ -724,11 +725,16 @@ def render(template_path: Path, course_data: dict[str, Any], output_path: Path, 
 
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(description="Render a Genie Learning course as index.html + assets/ bundle.")
-    parser.add_argument("owner_name", help="Course directory name under content/ (e.g. expressjs-express).")
+    parser.add_argument("owner_name", nargs="?", help="Course directory name under content/ (e.g. expressjs-express).")
     parser.add_argument("--project-root", default=None, help="Project root (default: parent of scripts/).")
     parser.add_argument("--output-dir", default=None, help="Directory to write index.html (and assets/) into (default: content/<owner_name>/).")
     parser.add_argument("--check", action="store_true", help="Validate the course without writing HTML or assets.")
+    parser.add_argument("--version", action="store_true", help="Print version and exit.")
     args = parser.parse_args(argv)
+
+    if args.version:
+        print(VERSION)
+        return 0
 
     project_root = Path(args.project_root) if args.project_root else Path(__file__).resolve().parent.parent
     content_dir = project_root / "content" / args.owner_name
