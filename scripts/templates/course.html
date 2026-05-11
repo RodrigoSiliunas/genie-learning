@@ -407,10 +407,18 @@
 
         <div class="flex flex-wrap items-center justify-between gap-4 mb-7">
           <div class="flex flex-wrap items-center gap-3">
-            <span class="font-mono text-[11px] text-[var(--muted)]">{{ lastReviewLabel }}</span>
+            <div class="font-mono text-[11px] text-[var(--muted)]">
+              <span class="text-[var(--ink)] font-medium">{{ filterCounts.due }}</span> {{ t('lbl_due') }}<span class="opacity-40"> · </span>
+              <span class="text-[var(--ink)] font-medium">{{ filterCounts.new }}</span> {{ t('lbl_new') }}<span class="opacity-40"> · </span>
+              <span class="text-[var(--muted)]">{{ filterCounts.total }}</span> {{ t('lbl_total') }}
+            </div>
+            <span class="font-mono text-[11px] text-[var(--muted)] opacity-60">{{ lastReviewLabel }}</span>
             <div class="seg">
-              <button @click="flashFilter = 'all'" :class="{'is-active': flashFilter === 'all'}">{{ t('show_all') }}</button>
-              <button @click="flashFilter = 'unknown'" :class="{'is-active': flashFilter === 'unknown'}">{{ t('show_only_unknown') }}</button>
+              <button @click="flashFilter = 'due'" :class="{'is-active': flashFilter === 'due'}">{{ t('filter_due') }} ({{ filterCounts.due }})</button>
+              <button @click="flashFilter = 'new'" :class="{'is-active': flashFilter === 'new'}">{{ t('filter_new') }} ({{ filterCounts.new }})</button>
+              <button @click="flashFilter = 'learning'" :class="{'is-active': flashFilter === 'learning'}">{{ t('filter_learning') }} ({{ filterCounts.learning }})</button>
+              <button @click="flashFilter = 'mature'" :class="{'is-active': flashFilter === 'mature'}">{{ t('filter_mature') }} ({{ filterCounts.mature }})</button>
+              <button @click="flashFilter = 'all'" :class="{'is-active': flashFilter === 'all'}">{{ t('show_all') }} ({{ filterCounts.total }})</button>
             </div>
             <div class="seg">
               <button @click="flashSourceFilter = 'all'" :class="{'is-active': flashSourceFilter === 'all'}">{{ t('show_all') }}</button>
@@ -427,7 +435,13 @@
           </div>
         </div>
 
-        <template v-if="visibleFlashcards.length">
+        <template v-if="filterCounts.due === 0 && flashFilter === 'due'">
+          <div class="max-w-[680px] mx-auto rounded-2xl border hairline p-10 text-center">
+            <div class="text-[1.2rem] mb-3">{{ emptyDueLabel }}</div>
+            <button class="btn btn-accent" @click="flashFilter = 'new'">{{ t('see_new') }} →</button>
+          </div>
+        </template>
+        <template v-else-if="visibleFlashcards.length">
           <div class="flip-scene max-w-[680px] mx-auto">
             <div class="flip-card" :class="{'is-flipped': flipped}">
               <div class="flip-face flip-front" @click="flipped = true">
