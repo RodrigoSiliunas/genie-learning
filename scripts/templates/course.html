@@ -269,6 +269,27 @@
               <svg class="icon" width="14" height="14" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
             </button>
           </div>
+
+          <!-- Self-explanation prompt -->
+          <div class="mt-10 pt-6 border-t hairline">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-[1.1rem]">📝</span>
+              <span class="font-medium text-[14px] text-[var(--ink)]">{{ t('self_explain_label') }}</span>
+              <span v-if="selfExplanations[activeModule.slug]?.text?.trim()" class="font-mono text-[11px] text-[var(--correct)]">✓ {{ t('saved') }}</span>
+            </div>
+            <p class="text-[13px] text-[var(--muted)] mb-3 max-w-[60ch]">{{ t('self_explain_prompt') }}</p>
+            <textarea :value="selfExplanations[activeModule.slug]?.text || ''"
+                      @input="e => { if (!selfExplanations[activeModule.slug]) selfExplanations[activeModule.slug] = { text: '', savedAt: null }; selfExplanations[activeModule.slug] = {...selfExplanations[activeModule.slug], text: e.target.value}; autoSaveExplanation(activeModule.slug); }"
+                      rows="4"
+                      class="w-full p-4 rounded-xl border hairline bg-[var(--paper-2)] text-[14px] leading-relaxed focus:outline-none focus:border-[var(--ink)]"
+                      :placeholder="t('self_explain_hint')"></textarea>
+            <div class="flex items-center gap-3 mt-3">
+              <button class="btn btn-ghost text-[12px]" @click="saveSelfExplanation(activeModule.slug)">
+                <template v-if="saveExplBtnText">{{ saveExplBtnText }}</template>
+                <template v-else>{{ t('save_explanation') }}</template>
+              </button>
+            </div>
+          </div>
         </template>
       </section>
 
@@ -517,6 +538,29 @@
         <div v-else class="rounded-2xl border hairline p-12 text-center text-[var(--muted)]">
           <svg class="icon mx-auto mb-3" width="28" height="28" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg>
           {{ t('no_flashcards') }}
+        </div>
+      </section>
+
+      <!-- ========= NOTEBOOK ========= -->
+      <section v-else-if="view === 'notebook'" :key="'v-notebook'" class="view-enter">
+        <header class="mb-8">
+          <div class="eyebrow mb-3">{{ t('notebook') }}</div>
+          <h2 class="display-serif text-[40px] sm:text-[56px] leading-none mb-3"><em>Your</em> explanations<em class="text-[var(--accent)]">.</em></h2>
+          <p class="text-[15px] text-[var(--muted)] max-w-[55ch]">{{ t('notebook_subtitle') }}</p>
+        </header>
+        <template v-if="notebookCount">
+          <div v-for="m in data.modules.filter(m => selfExplanations[m.slug]?.text?.trim())" :key="m.slug" class="card p-6 sm:p-7 mb-5">
+            <h3 class="font-serif text-[22px] leading-tight mb-3">{{ m.title_display }}</h3>
+            <div class="prose-mini mb-4 p-4 rounded-xl" :style="{background: 'var(--paper-2)'}" v-html="renderMd(selfExplanations[m.slug].text)"></div>
+            <div class="flex items-center justify-between text-[12px] text-[var(--muted)]">
+              <span v-if="selfExplanations[m.slug].savedAt">{{ t('last_edited') }}: {{ new Date(selfExplanations[m.slug].savedAt).toLocaleDateString() }}</span>
+              <button class="text-[var(--accent)] hover:underline font-medium" @click="gotoModule(m.slug)">{{ t('edit') }} →</button>
+            </div>
+          </div>
+        </template>
+        <div v-else class="rounded-2xl border hairline p-12 text-center">
+          <div class="text-[2rem] mb-3">📝</div>
+          <div class="text-[var(--muted)]">{{ t('notebook_empty') }}</div>
         </div>
       </section>
 

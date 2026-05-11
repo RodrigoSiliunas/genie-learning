@@ -67,6 +67,19 @@ const app = createApp({
     const shortAnswers = ref(persisted.shortAnswers || {});   // { 'quizId:qi': text }
     const shortRevealed = ref(persisted.shortRevealed || {}); // { 'quizId:qi': true }
 
+    /* self-explanations — migrate legacy string to {text, savedAt} */
+    const migrateSelfExplain = (raw) => {
+      if (typeof raw === 'string') return { text: raw, savedAt: null };
+      if (raw && typeof raw === 'object' && 'text' in raw) return raw;
+      return { text: '', savedAt: null };
+    };
+    let rawSelf = persisted.selfExplanations || {};
+    const initSelf = {};
+    for (const slug in rawSelf) initSelf[slug] = migrateSelfExplain(rawSelf[slug]);
+    const selfExplanations = ref(initSelf);
+    const saveExplBtnText = ref('');  // '' = show 'Save' button, non-empty = feedback text
+    let autoSaveTimer = null;
+
     const flashIndex = ref(persisted.flashIndex || 0);
     const flashFilter = ref(persisted.flashFilter === 'unknown' ? 'new' : (persisted.flashFilter || 'due'));
     const flashSourceFilter = ref(persisted.flashSourceFilter || 'all');
@@ -161,6 +174,7 @@ const app = createApp({
       { id: 'glossary',   label: t('glossary'),   count: glossaryCount.value },
       { id: 'quizzes',    label: t('quizzes'),    count: data.value.quizzes.length },
       { id: 'flashcards', label: t('flashcards'), count: data.value.flashcards.length },
+      { id: 'notebook',   label: t('notebook'),   count: notebookCount.value },
       { id: 'podcast',    label: t('podcast') },
     ]);
 
@@ -245,6 +259,33 @@ const app = createApp({
         borderColor: 'transparent'
       };
     };
+    /* ---------- Self-explanation ---------- */
+    const saveSelfExplanation = (slug) => {
+      const entry = selfExplanations.value[slug];
+      if (!entry || !entry.text?.trim()) return;
+      selfExplanations.value = { ...selfExplanations.value, [slug]: { ...entry, savedAt: Date.now() } };
+      saveExplBtnText.value = '✓ ' + t('self_explain_saved');
+      setTimeout(() => { saveExplBtnText.value = ''; }, 2000);
+    };
+    const autoSaveExplanation = (slug) => {
+      if (autoSaveTimer) clearTimeout(autoSaveTimer);
+      autoSaveTimer = setTimeout(() => {
+        const entry = selfExplanations.value[slug];
+        if (!entry || !entry.text?.trim()) return;
+        selfExplanations.value = { ...selfExplanations.value, [slug]: { ...entry, savedAt: Date.now() } };
+      }, 1500);
+    };
+    const gotoModule = (slug) => {
+      const m = data.value.modules.find(m => m.slug === slug);
+      if (m) { view.value = 'modules'; activeModule.value = m; }
+    };
+    const notebookCount = computed(() => {
+      let count = 0;
+      for (const slug in selfExplanations.value) {
+        if (selfExplanations.value[slug].text?.trim()) count++;
+      }
+      return count;
+    });
     /* ---------- Calibration ---------- */
     const calibrationStats = computed(() => {
       const buckets = { 1: { total: 0, correct: 0 }, 2: { total: 0, correct: 0 }, 3: { total: 0, correct: 0 }, 4: { total: 0, correct: 0 }, 5: { total: 0, correct: 0 } };
@@ -577,6 +618,14 @@ Avalie:`;
               scheduleRef.value = migrated;
             }
             if (reloaded.grading) grading.value = reloaded.grading;
+            // self-explanations with migration
+            if (reloaded.selfExplanations) {
+              const migrated = {};
+              for (const slug in reloaded.selfExplanations) {
+                migrated[slug] = migrateSelfExplain(reloaded.selfExplanations[slug]);
+              }
+              selfExplanations.value = migrated;
+            }
             // Flash a brief confirmation
             const banner = document.createElement('div');
             banner.textContent = '✓ Progresso importado com sucesso';
@@ -615,12 +664,13 @@ Avalie:`;
         flashOrder: flashOrder.value,
         schedule: scheduleRef.value,
         knownMap: knownMap.value,
-        grading: grading.value
+        grading: grading.value,
+        selfExplanations: selfExplanations.value
       });
     };
 
     watch([view, theme, accent, activeQuizId, flashIndex, flashFilter,
-           mcAnswers, shortAnswers, shortRevealed, scheduleRef, grading], () => { persist(); }, { deep: true });
+           mcAnswers, shortAnswers, shortRevealed, scheduleRef, grading, selfExplanations], () => { persist(); }, { deep: true });
     watch([theme, accent], applyTweaks, { immediate: true });
     watch(flashFilter, () => { flashIndex.value = 0; flipped.value = false; });
     watch(flashSourceFilter, () => { flashIndex.value = 0; flipped.value = false; });
@@ -677,6 +727,7 @@ Avalie:`;
           else if (e.key === 'g') goto('glossary');
           else if (e.key === 'q') goto('quizzes');
           else if (e.key === 'f') goto('flashcards');
+          else if (e.key === 'n') goto('notebook');
           else if (e.key === 'p') goto('podcast');
         }
       });
@@ -699,6 +750,7 @@ Avalie:`;
       navItems, goto, t, renderMd, renderMdInline,
       titleDisplay, shortRepo, readTime,
       moduleTintStyle,
+      selfExplanations, notebookCount, saveSelfExplanation, autoSaveExplanation, gotoModule, saveExplBtnText,
       exportProgress, importProgress
     };
   }
