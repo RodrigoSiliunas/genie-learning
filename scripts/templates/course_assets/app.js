@@ -31,6 +31,7 @@ const app = createApp({
 
     const flashIndex = ref(persisted.flashIndex || 0);
     const flashFilter = ref(persisted.flashFilter || 'all');
+    const flashSourceFilter = ref(persisted.flashSourceFilter || 'all');
     const flipped = ref(false);
     const knownMap = ref(persisted.knownMap || {});           // { 'front-hash': true }
 
@@ -171,10 +172,16 @@ const app = createApp({
     /* ---------- Flashcards ---------- */
     const flashHash = (f) => f.source + ':' + (f.anchor || f.front);
     const visibleFlashcards = computed(() => {
+      let cards = data.value.flashcards;
+      // Known/unknown filter
       if (flashFilter.value === 'unknown') {
-        return data.value.flashcards.filter(f => !knownMap.value[flashHash(f)]);
+        cards = cards.filter(f => !knownMap.value[flashHash(f)]);
       }
-      return data.value.flashcards;
+      // Source filter
+      if (flashSourceFilter.value !== 'all') {
+        cards = cards.filter(f => f.source === flashSourceFilter.value);
+      }
+      return cards;
     });
     const currentFlash = computed(() => visibleFlashcards.value[Math.min(flashIndex.value, visibleFlashcards.value.length - 1)] || data.value.flashcards[0]);
     const knownCount = computed(() => data.value.flashcards.filter(f => knownMap.value[flashHash(f)]).length);
@@ -341,6 +348,7 @@ Avalie:`;
         shortRevealed: shortRevealed.value,
         flashIndex: flashIndex.value,
         flashFilter: flashFilter.value,
+        flashSourceFilter: flashSourceFilter.value,
         knownMap: knownMap.value,
         grading: grading.value
       });
@@ -350,6 +358,7 @@ Avalie:`;
            mcAnswers, shortAnswers, shortRevealed, knownMap, grading], () => { persist(); }, { deep: true });
     watch([theme, accent], applyTweaks, { immediate: true });
     watch(flashFilter, () => { flashIndex.value = 0; flipped.value = false; });
+    watch(flashSourceFilter, () => { flashIndex.value = 0; flipped.value = false; });
     watch(view, () => { flipped.value = false; });
 
     onMounted(() => {
@@ -378,7 +387,7 @@ Avalie:`;
       activeQuizId, activeQuiz, mcAnswers, shortAnswers, shortRevealed,
       shortKey, quizAnswered, quizProgress, answerMc, revealShort, optionClass,
       grading, gradingLoading, gradeShort, gradingStyle,
-      flashIndex, flashFilter, flipped, knownMap, knownCount,
+      flashIndex, flashFilter, flashSourceFilter, flipped, knownMap, knownCount,
       visibleFlashcards, currentFlash, prevFlash, nextFlash, markFlash,
       navItems, goto, t, renderMd, renderMdInline,
       titleDisplay, shortRepo,
