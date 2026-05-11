@@ -693,7 +693,13 @@ def render(template_path: Path, course_data: dict[str, Any], output_path: Path, 
     template = template_path.read_text(encoding="utf-8")
     for placeholder in (DATA_PLACEHOLDER, ASSET_VERSION_PLACEHOLDER, GRADER_KEY_PLACEHOLDER):
         if placeholder not in template:
-            raise SystemExit(f"template missing placeholder `{placeholder}`")
+            hints = {
+                DATA_PLACEHOLDER: "regenerate the template or add `/* GENIE_DATA */` to course.html",
+                ASSET_VERSION_PLACEHOLDER: "add `__GENIE_ASSET_VERSION__` to course.html asset links",
+                GRADER_KEY_PLACEHOLDER: "add `/* GENIE_GRADER_KEY */` to course.html (or use an older template without grading)",
+            }
+            hint = hints.get(placeholder, "check that the template is up to date")
+            raise SystemExit(f"template missing placeholder `{placeholder}` — {hint}")
     asset_version = copy_assets(template_path.parent, output_path.parent)
 
     # Build grader context (RAG index + repo snippets)
