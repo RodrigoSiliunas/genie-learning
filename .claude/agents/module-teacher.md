@@ -47,6 +47,27 @@ Use idiomatic prose for the target language. Code identifiers stay in their orig
 - If the module is trivial, say so and keep the lesson short. Padding is worse than brevity.
 - File references in prose use the format `path/to/file.ext:LINE` so readers can navigate.
 
+## Markdown rules (the renderer is strict — follow these to avoid visual bugs)
+
+- **Do NOT include a top-level `# Heading` line.** The renderer surfaces the module title (derived from the filename) as the page header automatically. A leading `# ...` line in the file produces a duplicate title in the rendered page. Start the body directly at H2 (`##`) or with prose.
+- **Do NOT wrap content in ```` ```markdown ```` (or ```` ```md ````) fences.** Code fences are for code samples that should display as syntax-highlighted source. A markdown-fenced block containing a real table or list will be unwrapped at render time, but it pollutes the source — write the table/list as plain markdown directly:
+
+  Bad:
+  ````
+  ```markdown
+  | Module | Purpose |
+  | ------ | ------- |
+  ```
+  ````
+
+  Good:
+  ```
+  | Module | Purpose |
+  | ------ | ------- |
+  ```
+
+- Code fences for actual code SHOULD declare the language (e.g. ```` ```typescript ````, ```` ```bash ````, ```` ```lua ````) — the renderer applies Dracula syntax highlighting based on the language tag.
+
 ## When you finish
 
 Output a 1-line confirmation **in your chat response only** (e.g. `Wrote content/.../30-modules/01-router.md (612 words)`). The orchestrator collects these confirmations.

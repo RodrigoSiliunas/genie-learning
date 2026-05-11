@@ -20,7 +20,6 @@ const app = createApp({
 
     const theme = ref(persisted.theme || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
     const accent = ref(persisted.accent || 'moss');
-    const density = ref(persisted.density || 'comfortable');
 
     const activeModule = ref(null);
     const glossaryQuery = ref('');
@@ -39,12 +38,32 @@ const app = createApp({
     const t = (key) => (data.value.chrome && data.value.chrome[key]) || key;
 
     /* ---------- Markdown rendering ---------- */
+    const escapeHtml = (s) => s.replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     if (window.marked) {
       window.marked.use({
         breaks: false, gfm: true,
         renderer: {
           link({href, title, text}) {
             return `<a href="${href}" ${title ? `title="${title}"` : ''} target="_blank" rel="noopener">${text}</a>`;
+          },
+          code(text, lang) {
+            const language = (lang || '').trim().toLowerCase() || 'plaintext';
+            // Authors sometimes wrap a real markdown table or list inside ```markdown ... ```
+            // intending it to render as content, not as syntax-highlighted source. Unwrap it.
+            // (Anyone who wants to actually display markdown source can use ```text or no fence.)
+            if (language === 'markdown' || language === 'md') {
+              return window.marked.parse(text);
+            }
+            const grammar = window.Prism && window.Prism.languages && window.Prism.languages[language];
+            const body = grammar
+              ? window.Prism.highlight(text, grammar, language)
+              : escapeHtml(text);
+            const cls = `language-${language}`;
+            return `<pre class="${cls}" data-language="${language}"><code class="${cls}">${body}</code></pre>`;
+          },
+          table(header, body) {
+            const bodyHtml = body ? `<tbody>${body}</tbody>` : '';
+            return `<div class="table-wrap"><table><thead>${header}</thead>${bodyHtml}</table></div>`;
           }
         }
       });
@@ -195,7 +214,6 @@ const app = createApp({
       const root = document.documentElement;
       root.setAttribute('data-theme', theme.value);
       root.setAttribute('data-accent', accent.value);
-      root.setAttribute('data-density', density.value);
     };
 
     /* ---------- Persistence ---------- */
@@ -204,7 +222,6 @@ const app = createApp({
         view: view.value,
         theme: theme.value,
         accent: accent.value,
-        density: density.value,
         activeQuizId: activeQuizId.value,
         mcAnswers: mcAnswers.value,
         shortAnswers: shortAnswers.value,
@@ -215,9 +232,9 @@ const app = createApp({
       });
     };
 
-    watch([view, theme, accent, density, activeQuizId, flashIndex, flashFilter,
+    watch([view, theme, accent, activeQuizId, flashIndex, flashFilter,
            mcAnswers, shortAnswers, shortRevealed, knownMap], () => { persist(); }, { deep: true });
-    watch([theme, accent, density], applyTweaks, { immediate: true });
+    watch([theme, accent], applyTweaks, { immediate: true });
     watch(flashFilter, () => { flashIndex.value = 0; flipped.value = false; });
     watch(view, () => { flipped.value = false; });
 
@@ -236,7 +253,7 @@ const app = createApp({
 
     return {
       data, view, drawerOpen, tweaksOpen,
-      theme, accent, density,
+      theme, accent,
       activeModule, activeModuleIndex, openModule,
       glossaryQuery, filteredGlossary, glossaryCount,
       activeQuizId, activeQuiz, mcAnswers, shortAnswers, shortRevealed,

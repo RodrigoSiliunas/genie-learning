@@ -75,6 +75,10 @@ Keep it under 500 words. No fluff.
 
 **Stack accuracy rule:** when listing the stack, reflect the *current* state of the repo. If the README, `CHANGELOG`, or top-of-file comments indicate a substitution (`X replaces Y`, `moved from Y to X`, `deprecated Y in favor of X`), the stack bullet must reflect X — not Y. If Y still exists in a peripheral role (e.g. external bridge, legacy adapter), call that out explicitly in the same bullet: `X for primary use; Y only for <specific peripheral case>`. This prevents downstream agents (tutorial, glossary, podcast) from inheriting a stale claim.
 
+**Markdown rules** (the renderer is strict — follow these to avoid visual bugs):
+- **Do NOT include a top-level `# Heading` line at the start of `00-overview.md`.** The renderer surfaces the project title as the page header automatically. Start the body directly with the first H2 (`##`).
+- **Do NOT wrap the module map (or any content) in ```` ```markdown ```` fences.** Write the table/list as plain markdown directly. Code fences are reserved for actual code samples that should display as syntax-highlighted source.
+
 ## Step 4 — Return JSON inventory
 
 End your response with a fenced ```json block matching exactly this schema:

@@ -47,7 +47,6 @@
     --max-w: 1180px;
     --radius: 14px;
     --radius-sm: 10px;
-    --density-y: 24px;
   }
 
   [data-theme="dark"] {
@@ -117,10 +116,6 @@
     --accent-soft:  oklch(0.30 0.06 265);
     --accent-ink:   oklch(0.92 0.06 265);
     --accent-line:  oklch(0.50 0.09 265);
-  }
-
-  [data-density="compact"] {
-    --density-y: 14px;
   }
 
   /* Reset/base */
@@ -222,22 +217,112 @@
     padding: 1px 6px; border-radius: 5px;
     color: var(--accent-ink);
   }
-  .prose-genie pre {
-    background: var(--paper-2);
-    border: 1px solid var(--hairline);
+  /* === Code blocks: Dracula override === */
+  /* Always dark, even in light mode — code blocks are intentional dark islands. */
+  .prose-genie pre[class*="language-"] {
+    background: #282a36;
+    border: 1px solid #1e1f29;
     border-radius: 12px;
-    padding: 18px 20px;
+    padding: 22px 20px 18px;
     overflow-x: auto;
-    line-height: 1.6;
-  }
-  .prose-genie pre code {
     font-family: 'JetBrains Mono', ui-monospace, monospace;
     font-size: 13px;
-    color: var(--ink);
+    line-height: 1.6;
+    position: relative;
+    text-shadow: none;
   }
-  .prose-genie table { border-collapse: collapse; width: 100%; }
-  .prose-genie th, .prose-genie td { border-bottom: 1px solid var(--hairline); padding: 8px 10px; text-align: left; }
-  .prose-genie th { color: var(--muted); font-weight: 600; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.05em; }
+  .prose-genie pre[class*="language-"] code {
+    font-family: inherit;
+    font-size: inherit;
+    color: #f8f8f2;
+    background: transparent;
+    padding: 0;
+    border: 0;
+    text-shadow: none;
+  }
+  /* Language badge in top-right (skip when plaintext) */
+  .prose-genie pre[data-language]::before {
+    content: attr(data-language);
+    position: absolute;
+    top: 6px; right: 12px;
+    font-size: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    color: rgba(248, 248, 242, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    pointer-events: none;
+  }
+  .prose-genie pre[data-language="plaintext"]::before { content: ""; }
+
+  /* === Tables: improved (wrapped via marked renderer in <div class="table-wrap">) === */
+  .prose-genie .table-wrap {
+    margin: 1.6em 0;
+    overflow-x: auto;
+    border: 1px solid var(--hairline-2);
+    border-radius: 10px;
+    background: var(--paper);
+  }
+  .prose-genie .table-wrap > table {
+    margin: 0;
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14.5px;
+  }
+  .prose-genie .table-wrap th,
+  .prose-genie .table-wrap td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--hairline-2);
+    text-align: left;
+    vertical-align: top;
+  }
+  .prose-genie .table-wrap thead th {
+    background: var(--paper-2);
+    color: var(--ink);
+    font-weight: 600;
+    font-size: 12.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border-bottom-width: 2px;
+  }
+  .prose-genie .table-wrap tbody tr:nth-child(even) {
+    background: color-mix(in oklab, var(--paper-2) 50%, transparent);
+  }
+  .prose-genie .table-wrap tbody tr:hover {
+    background: var(--accent-soft);
+  }
+  .prose-genie .table-wrap tbody tr:last-child td { border-bottom: 0; }
+
+  /* === Task lists (GFM) === */
+  .prose-genie input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 14px; height: 14px;
+    border: 1.5px solid var(--hairline-2);
+    border-radius: 4px;
+    vertical-align: middle;
+    margin-right: 8px;
+    margin-bottom: 2px;
+    position: relative;
+    background: var(--paper);
+    cursor: default;
+  }
+  .prose-genie input[type="checkbox"]:checked {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .prose-genie input[type="checkbox"]:checked::after {
+    content: "";
+    position: absolute;
+    left: 3px; top: 0;
+    width: 4px; height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+  .prose-genie li:has(> input[type="checkbox"]) { list-style: none; margin-left: -1.4em; }
+
+  /* === Strikethrough (GFM) === */
+  .prose-genie del { color: var(--muted); text-decoration-color: var(--muted); }
 
   /* Compact prose used in glossary */
   .prose-mini { color: var(--ink-soft); font-size: 14.5px; line-height: 1.6; }
@@ -269,7 +354,6 @@
     background: var(--ink);
     color: var(--paper);
   }
-  [data-theme="dark"] .btn-primary { background: var(--paper); color: var(--ink); }
   .btn-primary:hover { background: var(--accent-deep); color: white; }
   [data-theme="dark"] .btn-primary:hover { background: var(--accent); color: var(--accent-ink); }
   .btn-ghost {
@@ -559,12 +643,8 @@
     overflow-y: auto;
   }
 
-  /* Density spacing */
-  .stack { display: flex; flex-direction: column; gap: var(--density-y); }
-
-  /* Audio */
-  audio { width: 100%; }
-  audio::-webkit-media-controls-panel { background: var(--paper-2); }
+  /* Audio — force light-themed native player so it stays legible on the dark card */
+  audio { width: 100%; color-scheme: light; }
 
   /* Icon stroke */
   .icon { stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; fill: none; }

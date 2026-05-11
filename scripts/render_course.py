@@ -282,6 +282,18 @@ def parse_first_h1(raw: str | None) -> str | None:
     return m.group(1).strip() if m else None
 
 
+def strip_first_h1(raw: str | None) -> str | None:
+    """Drop the leading `# ...` line (and a single trailing blank line) from `raw`.
+
+    The renderer surfaces the H1 as `title_display` separately in the page header;
+    leaving it inside the rendered prose duplicates the title visually.
+    """
+    if not raw:
+        return raw
+    m = re.match(r"\s*#\s+[^\n]*\n+", raw)
+    return raw[m.end():] if m else raw
+
+
 def parse_glossary(raw: str | None) -> list[dict[str, Any]]:
     """Parse `20-glossary.md` into [{letter, terms: [{term, definition, anchor}]}]."""
     if not raw:
@@ -481,7 +493,7 @@ def discover_modules(content_dir: Path, inventory_modules: list[dict[str, Any]] 
             "name": slug,
             "title_display": title,
             "purpose": purpose,
-            "raw": raw,
+            "raw": strip_first_h1(raw),
         })
     return modules
 
@@ -553,8 +565,8 @@ def build_course_data(content_dir: Path, owner_name: str) -> dict[str, Any]:
         "title_display": title_display,
         "repo_url": repo_url,
         "chrome": chrome,
-        "overview": {"raw": overview_raw},
-        "tutorial": {"raw": tutorial_raw} if tutorial_raw else None,
+        "overview": {"raw": strip_first_h1(overview_raw)},
+        "tutorial": {"raw": strip_first_h1(tutorial_raw)} if tutorial_raw else None,
         "glossary": glossary,
         "modules": modules,
         "quizzes": quizzes,

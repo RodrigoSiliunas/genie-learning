@@ -48,11 +48,17 @@ A concrete, small modification the reader can make to *prove* they understand: c
 ## Style rules
 
 - Imperative voice ("Run `npm install`"), not passive.
-- Every shell command in a fenced code block with the language tag.
+- Every shell command in a fenced code block with the language tag (```` ```bash ````, ```` ```sh ````, ```` ```pwsh ````).
 - Every file reference uses `path/to/file.ext:LINE` so it's navigable.
 - **Path citations must be relative to the repo root** — `src/foo.cpp:12`, `CMakePresets.json:3`, `README.md:5`, `package.json:14`. **Never** include the `repos/<owner>-<name>/` clone prefix. The clone path is your filesystem reality; the user-facing citation is repo-relative so a reader doing `git clone <repo_url>` from scratch can navigate the same paths.
 - If the project's setup is genuinely complex (multiple services, DBs, etc.), say so and link to their docs rather than reinventing them.
 - No "as we will see in the next chapter" — this is a single document.
+
+## Markdown rules (the renderer is strict — follow these to avoid visual bugs)
+
+- **Do NOT include a top-level `# Heading` line.** The renderer surfaces the tutorial title as the page header automatically. Start the body directly with the first numbered section heading.
+- **Do NOT wrap content in ```` ```markdown ```` (or ```` ```md ````) fences.** A markdown-fenced block containing a real table or list will be unwrapped at render time, but it pollutes the source. Write tables and lists as plain markdown directly.
+- Code fences for actual code SHOULD declare the language (e.g. ```` ```typescript ````, ```` ```bash ````, ```` ```python ````) — the renderer applies Dracula syntax highlighting based on the language tag.
 
 ## When you finish
 
