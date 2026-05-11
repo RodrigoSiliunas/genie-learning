@@ -26,6 +26,15 @@ class TestOutputDir:
         template_dst.mkdir(parents=True)
         template_dst.joinpath("course.html").write_text(template_src.read_text(encoding="utf-8"), encoding="utf-8")
 
+        # copy_assets() also needs course_assets/ next to the template
+        assets_src = template_src.parent / "course_assets"
+        if assets_src.is_dir():
+            assets_dst = template_dst / "course_assets"
+            assets_dst.mkdir(parents=True, exist_ok=True)
+            for f in assets_src.iterdir():
+                if f.is_file():
+                    assets_dst.joinpath(f.name).write_bytes(f.read_bytes())
+
         custom_dir = tmp_path / "dist"
         monkeypatch.chdir(tmp_path)
         rc = render_course.main(["test-course", "--project-root", str(tmp_path), "--output-dir", str(custom_dir)])
