@@ -134,6 +134,15 @@ const app = createApp({
     const shortKey = (qid, qi) => `${qid}:${qi}`;
     const quizAnswered = (qid, qi) => !!(mcAnswers.value[qid] && mcAnswers.value[qid][qi]);
 
+    const scrollToQuestion = (qi) => {
+      // Scroll the answered question card into view after a brief delay for Vue re-render
+      setTimeout(() => {
+        const cards = document.querySelectorAll('.view-enter .card');
+        const target = cards[qi];
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 50);
+    };
+
     const quizProgress = (q) => {
       let answered = 0;
       q.questions.forEach((qq, qi) => {
@@ -152,10 +161,12 @@ const app = createApp({
       if (!mcAnswers.value[qid]) mcAnswers.value[qid] = {};
       if (mcAnswers.value[qid][qi]) return;
       mcAnswers.value[qid] = { ...mcAnswers.value[qid], [qi]: key };
+      scrollToQuestion(qi);
     };
 
     const revealShort = (qid, qi) => {
       shortRevealed.value = { ...shortRevealed.value, [shortKey(qid, qi)]: true };
+      scrollToQuestion(qi);
     };
 
     const optionClass = (qid, qi, q, opt) => {
