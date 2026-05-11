@@ -760,6 +760,14 @@ def main(argv: list[str]) -> int:
         audio_status = "yes" if course_data["podcast"]["audio_file"] else "no"
         print(f"check: course '{args.owner_name}' is valid")
         print(f"Modules: {n_modules} | Quizzes: {n_quizzes} | Glossary terms: {n_terms} | Flashcards: {n_cards} | Audio: {audio_status}")
+
+        warnings = 0
+        for q in course_data["quizzes"]:
+            if len(q["questions"]) == 0:
+                print(f"  warning: quiz '{q['id']}' has 0 questions (missing or malformed ## Perguntas/## Questions heading?)")
+                warnings += 1
+        if warnings:
+            print(f"  ({warnings} warning(s) — course will still render, missing quizzes will be skipped)")
         return 0
 
     render(template_path, course_data, output_path, project_root)
