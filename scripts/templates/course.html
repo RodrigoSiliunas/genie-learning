@@ -426,9 +426,29 @@
                     <span class="text-[14.5px] leading-relaxed text-[var(--ink)]">{{ opt.text }}</span>
                   </button>
                 </div>
-                <div v-if="quizAnswered(activeQuiz.id, qi) && q.explanation" class="reveal-in mt-5 p-4 rounded-xl border" :style="{background: 'var(--accent-soft)', borderColor: 'transparent'}">
-                  <div class="eyebrow mb-1.5" :style="{color: 'var(--accent-ink)'}">{{ t('explanation') }}</div>
-                  <div class="text-[14px] leading-relaxed" :style="{color: 'var(--accent-ink)'}">{{ q.explanation }}</div>
+                <!-- Elaborative "why" gate: prompts learner to articulate reasoning before reading the canonical explanation. Pressley 1992; Chi 1989. -->
+                <div v-if="quizAnswered(activeQuiz.id, qi) && q.explanation && !mcWhyRevealed[shortKey(activeQuiz.id, qi)]" class="reveal-in mt-5">
+                  <div class="font-mono text-[11px] text-[var(--muted)] mb-2">{{ t('why_label') }}</div>
+                  <input type="text"
+                         :value="mcWhyAttempts[shortKey(activeQuiz.id, qi)] || ''"
+                         @input="e => updateWhyAttempt(activeQuiz.id, qi, e.target.value)"
+                         :placeholder="t('why_placeholder')"
+                         class="w-full p-3 rounded-xl border hairline bg-[var(--paper-2)] text-[14px] focus:outline-none focus:border-[var(--ink)]" />
+                  <div class="mt-3 flex items-center gap-3 flex-wrap">
+                    <button class="btn btn-primary" @click="revealWhy(activeQuiz.id, qi)">{{ t('why_reveal') }}</button>
+                    <button class="btn btn-ghost" @click="revealWhy(activeQuiz.id, qi)">{{ t('why_skip') }}</button>
+                  </div>
+                </div>
+                <!-- Learner's elaboration (read-only) + canonical explanation, shown after reveal/skip -->
+                <div v-else-if="quizAnswered(activeQuiz.id, qi) && q.explanation && mcWhyRevealed[shortKey(activeQuiz.id, qi)]" class="reveal-in mt-5 space-y-3">
+                  <div v-if="mcWhyAttempts[shortKey(activeQuiz.id, qi)]" class="p-3 rounded-xl border hairline" :style="{background: 'var(--paper-2)'}">
+                    <div class="eyebrow text-[10px] mb-1">{{ t('your_why') }}</div>
+                    <div class="text-[14px] whitespace-pre-wrap">{{ mcWhyAttempts[shortKey(activeQuiz.id, qi)] }}</div>
+                  </div>
+                  <div class="p-4 rounded-xl border" :style="{background: 'var(--accent-soft)', borderColor: 'transparent'}">
+                    <div class="eyebrow mb-1.5" :style="{color: 'var(--accent-ink)'}">{{ t('explanation') }}</div>
+                    <div class="text-[14px] leading-relaxed" :style="{color: 'var(--accent-ink)'}">{{ q.explanation }}</div>
+                  </div>
                 </div>
               </template>
 

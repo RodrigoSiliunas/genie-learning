@@ -66,6 +66,8 @@ const app = createApp({
     const mcConfidence = ref({});                              // { 'quizId:qi': number } — ephemeral before submit
     const shortAnswers = ref(persisted.shortAnswers || {});   // { 'quizId:qi': text }
     const shortRevealed = ref(persisted.shortRevealed || {}); // { 'quizId:qi': true }
+    const mcWhyAttempts = ref(persisted.mcWhyAttempts || {});   // { 'quizId:qi': text } — learner's elaboration before seeing explanation
+    const mcWhyRevealed = ref(persisted.mcWhyRevealed || {});   // { 'quizId:qi': true } — true after learner clicked Reveal/Skip
 
     /* self-explanations — migrate legacy string to {text, savedAt} */
     const migrateSelfExplain = (raw) => {
@@ -241,6 +243,13 @@ const app = createApp({
     const revealShort = (qid, qi) => {
       shortRevealed.value = { ...shortRevealed.value, [shortKey(qid, qi)]: true };
       scrollToQuestion(qi);
+    };
+
+    const updateWhyAttempt = (qid, qi, text) => {
+      mcWhyAttempts.value = { ...mcWhyAttempts.value, [shortKey(qid, qi)]: text };
+    };
+    const revealWhy = (qid, qi) => {
+      mcWhyRevealed.value = { ...mcWhyRevealed.value, [shortKey(qid, qi)]: true };
     };
 
     const optionClass = (qid, qi, q, opt) => {
@@ -618,6 +627,8 @@ Avalie:`;
             }
             if (reloaded.shortAnswers) shortAnswers.value = reloaded.shortAnswers;
             if (reloaded.shortRevealed) shortRevealed.value = reloaded.shortRevealed;
+            if (reloaded.mcWhyAttempts) mcWhyAttempts.value = reloaded.mcWhyAttempts;
+            if (reloaded.mcWhyRevealed) mcWhyRevealed.value = reloaded.mcWhyRevealed;
             if (reloaded.flashIndex != null) flashIndex.value = reloaded.flashIndex;
             if (reloaded.flashFilter) flashFilter.value = reloaded.flashFilter;
             if (reloaded.flashSourceFilter) flashSourceFilter.value = reloaded.flashSourceFilter;
@@ -675,6 +686,8 @@ Avalie:`;
         mcAnswers: mcAnswers.value,
         shortAnswers: shortAnswers.value,
         shortRevealed: shortRevealed.value,
+        mcWhyAttempts: mcWhyAttempts.value,
+        mcWhyRevealed: mcWhyRevealed.value,
         flashIndex: flashIndex.value,
         flashFilter: flashFilter.value,
         flashSourceFilter: flashSourceFilter.value,
@@ -688,7 +701,8 @@ Avalie:`;
     };
 
     watch([view, theme, accent, activeQuizId, flashIndex, flashFilter,
-           mcAnswers, shortAnswers, shortRevealed, scheduleRef, grading, selfExplanations, pretestAttempts], () => { persist(); }, { deep: true });
+           mcAnswers, shortAnswers, shortRevealed, mcWhyAttempts, mcWhyRevealed,
+           scheduleRef, grading, selfExplanations, pretestAttempts], () => { persist(); }, { deep: true });
     watch([theme, accent], applyTweaks, { immediate: true });
     watch(flashFilter, () => { flashIndex.value = 0; flipped.value = false; });
     watch(flashSourceFilter, () => { flashIndex.value = 0; flipped.value = false; });
@@ -757,6 +771,7 @@ Avalie:`;
       activeModule, activeModuleIndex, openModule,
       glossaryQuery, filteredGlossary, glossaryCount,
       activeQuizId, activeQuiz, mcAnswers, shortAnswers, shortRevealed,
+      mcWhyAttempts, mcWhyRevealed, updateWhyAttempt, revealWhy,
       shortKey, quizAnswered, quizProgress, answerMc, revealShort, optionClass,
       grading, gradingLoading, gradeShort, gradingStyle,
       mcConfidence, calibrationStats,
