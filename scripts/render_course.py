@@ -36,6 +36,31 @@ from pathlib import Path
 from typing import Any
 
 ASSET_FILES: tuple[str, ...] = ("style.css", "app.js")
+SAFE_PLACEHOLDER_API_KEY = "your_gemini_api_key_here"
+
+
+def load_env_file(path: Path) -> None:
+    """Populate os.environ from a .env file (stdlib parser, no python-dotenv)."""
+    if not path.is_file():
+        return
+    for raw_line in path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        key = key.strip()
+        value = value.strip().strip('"').strip("'")
+        if key and key not in os.environ:
+            os.environ[key] = value
+
+
+def resolve_grader_api_key(project_root: Path) -> str:
+    """Return the Gemini API key for the inline grader, or empty string."""
+    load_env_file(project_root / ".env")
+    key = os.environ.get("GEMINI_API_KEY", "").strip()
+    if not key or key == SAFE_PLACEHOLDER_API_KEY:
+        return ""
+    return key
 ASSET_VERSION_PLACEHOLDER = "__GENIE_ASSET_VERSION__"
 DATA_PLACEHOLDER = "/* GENIE_DATA */"
 VERSION = "1.1.0"
@@ -957,7 +982,7 @@ def render(template_path: Path, course_data: dict[str, Any], output_path: Path, 
 
     payload = json.dumps(course_data, ensure_ascii=False, separators=(",", ":"))
     b64 = base64.b64encode(payload.encode("utf-8")).decode("ascii")
-    api_key = os.environ.get("GEMINI_API_KEY", "")
+    api_key = resolve_grader_api_key(project_root)
     rendered = template.replace(DATA_PLACEHOLDER, b64, 1)
     rendered = rendered.replace(ASSET_VERSION_PLACEHOLDER, asset_version)
     rendered = rendered.replace(GRADER_KEY_PLACEHOLDER, api_key)
