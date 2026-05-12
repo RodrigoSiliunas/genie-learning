@@ -80,6 +80,8 @@ const app = createApp({
     const saveExplBtnText = ref('');  // '' = show 'Save' button, non-empty = feedback text
     let autoSaveTimer = null;
 
+    const pretestAttempts = ref(persisted.pretestAttempts || {});
+
     const flashIndex = ref(persisted.flashIndex || 0);
     const flashFilter = ref(persisted.flashFilter === 'unknown' ? 'new' : (persisted.flashFilter || 'due'));
     const flashSourceFilter = ref(persisted.flashSourceFilter || 'all');
@@ -286,6 +288,20 @@ const app = createApp({
       }
       return count;
     });
+    /* ---------- Pretest gate ---------- */
+    const updatePretestAttempt = (slug, idx, text) => {
+      const entry = pretestAttempts.value[slug] || {};
+      pretestAttempts.value = { ...pretestAttempts.value, [slug]: { ...entry, [idx]: text } };
+    };
+    const submitPretest = (slug) => {
+      const entry = pretestAttempts.value[slug] || {};
+      pretestAttempts.value = { ...pretestAttempts.value, [slug]: { ...entry, submitted: true } };
+      setTimeout(() => {
+        const article = document.querySelector('.prose-genie');
+        if (article) article.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    };
+    const pretestSubmitted = (slug) => !!pretestAttempts.value[slug]?.submitted;
     /* ---------- Calibration ---------- */
     const calibrationStats = computed(() => {
       const buckets = { 1: { total: 0, correct: 0 }, 2: { total: 0, correct: 0 }, 3: { total: 0, correct: 0 }, 4: { total: 0, correct: 0 }, 5: { total: 0, correct: 0 } };
@@ -626,6 +642,7 @@ Avalie:`;
               }
               selfExplanations.value = migrated;
             }
+            if (reloaded.pretestAttempts) pretestAttempts.value = reloaded.pretestAttempts;
             // Flash a brief confirmation
             const banner = document.createElement('div');
             banner.textContent = '✓ Progresso importado com sucesso';
@@ -665,12 +682,13 @@ Avalie:`;
         schedule: scheduleRef.value,
         knownMap: knownMap.value,
         grading: grading.value,
-        selfExplanations: selfExplanations.value
+        selfExplanations: selfExplanations.value,
+        pretestAttempts: pretestAttempts.value
       });
     };
 
     watch([view, theme, accent, activeQuizId, flashIndex, flashFilter,
-           mcAnswers, shortAnswers, shortRevealed, scheduleRef, grading, selfExplanations], () => { persist(); }, { deep: true });
+           mcAnswers, shortAnswers, shortRevealed, scheduleRef, grading, selfExplanations, pretestAttempts], () => { persist(); }, { deep: true });
     watch([theme, accent], applyTweaks, { immediate: true });
     watch(flashFilter, () => { flashIndex.value = 0; flipped.value = false; });
     watch(flashSourceFilter, () => { flashIndex.value = 0; flipped.value = false; });
@@ -751,6 +769,7 @@ Avalie:`;
       titleDisplay, shortRepo, readTime,
       moduleTintStyle,
       selfExplanations, notebookCount, saveSelfExplanation, autoSaveExplanation, gotoModule, saveExplBtnText,
+      pretestAttempts, updatePretestAttempt, submitPretest, pretestSubmitted,
       exportProgress, importProgress
     };
   }

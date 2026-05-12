@@ -255,7 +255,38 @@
             <span class="font-mono text-[11px]">{{ readTime(activeModule.raw) }} read</span>
           </div>
           <p class="text-[16px] text-[var(--muted)] max-w-[60ch] mb-8 leading-relaxed">{{ activeModule.purpose }}</p>
-          <article class="prose-genie max-w-[68ch]" v-html="renderMd(activeModule.raw)"></article>
+
+          <!-- Pretest gate -->
+          <div v-if="activeModule.pretest" class="card p-6 sm:p-7 mb-8" :style="{background: 'var(--paper-2)'}">
+            <div class="eyebrow mb-3">{{ t('pretest_label') }}</div>
+            <p class="text-[14px] text-[var(--muted)] mb-5 max-w-[60ch]">{{ t('pretest_hint') }}</p>
+            <div v-for="(q, i) in activeModule.pretest.questions" :key="i" class="mb-4">
+              <p class="text-[15px] mb-2"><span class="font-mono text-[var(--muted)] mr-2">{{ i+1 }}.</span>{{ q }}</p>
+              <textarea v-if="!pretestSubmitted(activeModule.slug)"
+                        :value="pretestAttempts[activeModule.slug]?.[i] || ''"
+                        @input="e => updatePretestAttempt(activeModule.slug, i, e.target.value)"
+                        rows="2"
+                        class="w-full p-3 rounded-xl border hairline bg-[var(--paper)] text-[14px] leading-relaxed focus:outline-none focus:border-[var(--ink)]"
+                        :placeholder="t('pretest_placeholder')"></textarea>
+              <div v-else class="p-3 rounded-xl border hairline" :style="{background:'var(--paper)'}">
+                <div class="eyebrow text-[10px] mb-1">{{ t('pretest_your_attempt') }}</div>
+                <div class="text-[14px] whitespace-pre-wrap">{{ pretestAttempts[activeModule.slug]?.[i] || '—' }}</div>
+              </div>
+            </div>
+            <button v-if="!pretestSubmitted(activeModule.slug)"
+                    class="btn btn-primary"
+                    @click="submitPretest(activeModule.slug)">
+              {{ t('pretest_reveal') }} →
+            </button>
+          </div>
+
+          <!-- Module body — only shown when no pretest or pretest submitted -->
+          <article v-if="!activeModule.pretest || pretestSubmitted(activeModule.slug)"
+                   class="prose-genie max-w-[68ch]"
+                   v-html="renderMd(activeModule.raw)"></article>
+          <div v-else class="rounded-2xl border hairline p-8 text-center text-[var(--muted)] text-[13px]">
+            {{ t('pretest_hint') }}
+          </div>
 
           <!-- prev/next -->
           <div class="mt-14 pt-6 border-t hairline flex justify-between gap-4">
@@ -346,7 +377,7 @@
             <span :style="{color: level <= 2 ? 'var(--wrong)' : level >= 4 ? 'var(--correct)' : 'var(--muted)'}">
               {{ level }}: {{ b.pct }}%
             </span>
-            <span v-if="idx < Object.keys(calibrationStats).length - 1" class="opacity-30">·</span>
+            <span v-if="level < 5" class="opacity-30">·</span>
           </template>
         </div>
 
