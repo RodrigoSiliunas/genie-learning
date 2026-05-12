@@ -501,33 +501,24 @@ Resposta do aluno: ${answer}
 
 Avalie:`;
 
-      const model = 'gemma-3-27b-it';
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${window.__GRADER_KEY}`;
+      const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-flash-latest'];
+      const body = JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.15, maxOutputTokens: 300 }
+      });
 
       try {
-        let resp = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { temperature: 0.15, maxOutputTokens: 300 }
-          })
-        });
-
-        if (!resp.ok && model === 'gemma-3-27b-it') {
-          // Fallback to gemini-2.0-flash
-          const fbUrl = url.replace('gemma-3-27b-it', 'gemini-2.0-flash');
-          resp = await fetch(fbUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: prompt }] }],
-              generationConfig: { temperature: 0.15, maxOutputTokens: 300 }
-            })
-          });
+        let resp;
+        let lastErrBody = '';
+        for (const m of models) {
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${window.__GRADER_KEY}`;
+          resp = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
+          if (resp.ok) break;
+          try { lastErrBody = (await resp.clone().text()).slice(0, 200); } catch {}
         }
-
-        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        if (!resp.ok) {
+          throw new Error(`HTTP ${resp.status}${lastErrBody ? ' — ' + lastErrBody.replace(/\s+/g, ' ') : ''}`);
+        }
 
         const data = await resp.json();
         const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
