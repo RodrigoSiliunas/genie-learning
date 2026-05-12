@@ -471,7 +471,11 @@ const app = createApp({
 
       const ctx = graderContext.value?.[key];
       if (!ctx) {
-        grading.value = { ...grading.value, [key]: '<div class="flex items-start gap-3"><span class="text-[1.4rem] leading-none mt-0.5">⚠️</span><div><strong>Contexto não disponível</strong><p class="mt-1.5 text-[14px] leading-relaxed" style="color:var(--ink-soft)">O arquivo <code>assets/grader_context.json</code> não foi encontrado. Re-renderize o curso para gerá-lo.</p></div></div>' };
+        grading.value = { ...grading.value, [key]: '<div class="flex items-start gap-3"><span class="text-[1.4rem] leading-none mt-0.5">⚠️</span><div><strong>Contexto não disponível</strong><p class="mt-1.5 text-[14px] leading-relaxed" style="color:var(--ink-soft)">Não há contexto indexado para esta pergunta. Re-renderize o curso (<code>/genie-render</code>) para regenerá-lo.</p></div></div>' };
+        return;
+      }
+      if (!window.__GRADER_KEY) {
+        grading.value = { ...grading.value, [key]: '<div class="flex items-start gap-3"><span class="text-[1.4rem] leading-none mt-0.5">🔑</span><div><strong>GEMINI_API_KEY ausente</strong><p class="mt-1.5 text-[14px] leading-relaxed" style="color:var(--ink-soft)">Defina <code>GEMINI_API_KEY</code> no arquivo <code>.env</code> do projeto (raiz) e rode <code>/genie-render</code> novamente. A chave fica embutida no HTML no momento da renderização.</p></div></div>' };
         return;
       }
 
