@@ -10,3 +10,14 @@ __pycache__/
 Thumbs.db
 .claude/settings.local.json
 .playwright-mcp/
+
+# Author-side skills (not part of the project's published surface — used to work ON the project, not part of it)
+.claude/skills/small-feature-hunt/
+.claude/skills/genie-pedagogy-brainstorm/
+
+# Windsurf skills (not part of the project's published surface — used to work ON the project, not part of it)
+.windsurf/skills/
+
+# Local brainstorm and loop logs (not part of the project's published surface)
+BRAINSTORM.md
+LOOP_LOG.md

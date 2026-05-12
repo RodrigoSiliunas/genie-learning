@@ -85,13 +85,13 @@ Write `output_path` in `language`. The report skeleton below is semantic guidanc
 - [ ] `...`
 
 ## Findings
-### BLOCKER
+### 🚫 BLOCKER
 - ...
 
-### WARNING
+### ⚠️ WARNING
 - ...
 
-### INFO
+### ℹ️ INFO
 - ...
 
 ## Manual validation checklist
