@@ -377,7 +377,7 @@
             <span :style="{color: level <= 2 ? 'var(--wrong)' : level >= 4 ? 'var(--correct)' : 'var(--muted)'}">
               {{ level }}: {{ b.pct }}%
             </span>
-            <span v-if="level < 5" class="opacity-30">·</span>
+            <span v-if="idx < Object.keys(calibrationStats).length - 1" class="opacity-30">·</span>
           </template>
         </div>
 
