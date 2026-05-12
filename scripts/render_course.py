@@ -40,6 +40,7 @@ ASSET_VERSION_PLACEHOLDER = "__GENIE_ASSET_VERSION__"
 DATA_PLACEHOLDER = "/* GENIE_DATA */"
 VERSION = "1.1.0"
 GRADER_KEY_PLACEHOLDER = "/* GENIE_GRADER_KEY */"
+GRADER_CTX_PLACEHOLDER = "/* GENIE_GRADER_CTX */"
 
 # ---------------------------------------------------------------------------
 # Chrome i18n strings
@@ -925,12 +926,13 @@ def copy_assets(template_dir: Path, output_dir: Path) -> str:
 
 def render(template_path: Path, course_data: dict[str, Any], output_path: Path, project_root: Path) -> None:
     template = template_path.read_text(encoding="utf-8")
-    for placeholder in (DATA_PLACEHOLDER, ASSET_VERSION_PLACEHOLDER, GRADER_KEY_PLACEHOLDER):
+    for placeholder in (DATA_PLACEHOLDER, ASSET_VERSION_PLACEHOLDER, GRADER_KEY_PLACEHOLDER, GRADER_CTX_PLACEHOLDER):
         if placeholder not in template:
             hints = {
                 DATA_PLACEHOLDER: "regenerate the template or add `/* GENIE_DATA */` to course.html",
                 ASSET_VERSION_PLACEHOLDER: "add `__GENIE_ASSET_VERSION__` to course.html asset links",
                 GRADER_KEY_PLACEHOLDER: "add `/* GENIE_GRADER_KEY */` to course.html (or use an older template without grading)",
+                GRADER_CTX_PLACEHOLDER: "add `/* GENIE_GRADER_CTX */` to course.html so grader context is inlined (works under file://)",
             }
             hint = hints.get(placeholder, "check that the template is up to date")
             raise SystemExit(f"template missing placeholder `{placeholder}` — {hint}")
@@ -950,8 +952,8 @@ def render(template_path: Path, course_data: dict[str, Any], output_path: Path, 
         overview_raw=course_data["overview"]["raw"] if course_data.get("overview") else None,
         tutorial_raw=course_data["tutorial"]["raw"] if course_data.get("tutorial") else None,
     )
-    grader_path = output_path.parent / "assets" / "grader_context.json"
-    grader_path.write_text(json.dumps(grader_context, ensure_ascii=False), encoding="utf-8")
+    grader_json = json.dumps(grader_context, ensure_ascii=False, separators=(",", ":"))
+    grader_b64 = base64.b64encode(grader_json.encode("utf-8")).decode("ascii")
 
     payload = json.dumps(course_data, ensure_ascii=False, separators=(",", ":"))
     b64 = base64.b64encode(payload.encode("utf-8")).decode("ascii")
@@ -959,7 +961,12 @@ def render(template_path: Path, course_data: dict[str, Any], output_path: Path, 
     rendered = template.replace(DATA_PLACEHOLDER, b64, 1)
     rendered = rendered.replace(ASSET_VERSION_PLACEHOLDER, asset_version)
     rendered = rendered.replace(GRADER_KEY_PLACEHOLDER, api_key)
+    rendered = rendered.replace(GRADER_CTX_PLACEHOLDER, grader_b64, 1)
     output_path.write_text(rendered, encoding="utf-8")
+
+    legacy_grader = output_path.parent / "assets" / "grader_context.json"
+    if legacy_grader.exists():
+        legacy_grader.unlink()
 
 
 def main(argv: list[str]) -> int:

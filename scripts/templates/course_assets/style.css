@@ -367,6 +367,60 @@
   [data-theme="dark"] .btn-accent { color: var(--accent-ink); }
   .btn-accent:hover { background: var(--accent-deep); }
 
+  /* === Flashcard rating row === */
+  .flash-nav { display: flex; align-items: stretch; gap: 14px; flex-wrap: wrap; }
+  .flash-nav-side { flex: 0 0 auto; }
+  .flash-rate-group {
+    flex: 1 1 360px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+    min-width: 0;
+  }
+  .flash-rate {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 8px;
+    min-height: 44px;
+    font-size: 14px;
+    font-weight: 500;
+    border: 1px solid var(--hairline-2);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+    transition: background-color .2s ease, border-color .2s ease, color .2s ease, transform .15s ease;
+    line-height: 1.1;
+    text-align: center;
+  }
+  .flash-rate:hover { background: var(--paper-2); border-color: var(--ink); }
+  .flash-rate:active { transform: translateY(1px); }
+  .flash-rate-dot {
+    width: 8px; height: 8px;
+    border-radius: 999px;
+    flex: 0 0 auto;
+    background: var(--muted);
+  }
+  .flash-rate-int {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 10.5px;
+    color: var(--muted);
+    letter-spacing: 0.02em;
+  }
+  .flash-rate--again .flash-rate-dot { background: var(--wrong); }
+  .flash-rate--again:hover { border-color: var(--wrong); color: var(--wrong); }
+  .flash-rate--hard   .flash-rate-dot { background: var(--muted); }
+  .flash-rate--good   .flash-rate-dot { background: var(--correct); }
+  .flash-rate--good:hover { border-color: var(--correct); color: var(--correct); }
+  .flash-rate--easy   .flash-rate-dot { background: var(--accent); }
+  .flash-rate--easy:hover { border-color: var(--accent); color: var(--accent); }
+  @media (max-width: 560px) {
+    .flash-rate-group { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .flash-rate { font-size: 13.5px; padding: 9px 6px; }
+  }
+
   /* === Chips & badges === */
   .badge {
     display: inline-flex; align-items: center; gap: 6px;
