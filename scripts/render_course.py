@@ -125,6 +125,12 @@ CHROME_STRINGS: dict[str, dict[str, str]] = {
         "quizzes_subtitle": "Simulados ancorados no conteúdo do curso. Seu progresso é salvo localmente.",
         "flashcards_subtitle": "Cards derivados do glossário e dos simulados. Marque o que você já sabe.",
         "podcast_subtitle": "Roteiro pronto para TTS. O player aparece automaticamente quando o áudio existir.",
+        "hero_modules_html": "{n} <em>lições</em>",
+        "hero_glossary_html": "<em>Um</em> índice<em class=\"text-[var(--accent)]\">.</em>",
+        "hero_quizzes_html": "<em>Verifique</em> seu entendimento<em class=\"text-[var(--accent)]\">.</em>",
+        "hero_flashcards_html": "<em>Lembrar</em>, repetir<em class=\"text-[var(--accent)]\">.</em>",
+        "hero_notebook_html": "<em>Suas</em> explicações<em class=\"text-[var(--accent)]\">.</em>",
+        "hero_podcast_html": "<em>O</em> companheiro de áudio<em class=\"text-[var(--accent)]\">.</em>",
         "footer_built": "Gerado por",
         "not_available": "Conteúdo não disponível.",
         "progress_hint": "Seu progresso fica salvo neste navegador (localStorage).",
@@ -224,6 +230,12 @@ CHROME_STRINGS: dict[str, dict[str, str]] = {
         "quizzes_subtitle": "Quizzes grounded in the course content. Progress is saved locally.",
         "flashcards_subtitle": "Cards derived from the glossary and quizzes. Mark what you already know.",
         "podcast_subtitle": "Script ready for TTS. The player appears automatically when audio exists.",
+        "hero_modules_html": "{n} <em>lessons</em>",
+        "hero_glossary_html": "<em>An</em> index<em class=\"text-[var(--accent)]\">.</em>",
+        "hero_quizzes_html": "<em>Check</em> your understanding<em class=\"text-[var(--accent)]\">.</em>",
+        "hero_flashcards_html": "<em>Recall</em>, repeat<em class=\"text-[var(--accent)]\">.</em>",
+        "hero_notebook_html": "<em>Your</em> explanations<em class=\"text-[var(--accent)]\">.</em>",
+        "hero_podcast_html": "<em>The</em> audio companion<em class=\"text-[var(--accent)]\">.</em>",
         "footer_built": "Built by",
         "not_available": "Content not available.",
         "progress_hint": "Your progress is saved in this browser (localStorage).",
@@ -285,6 +297,12 @@ CHROME_STRINGS: dict[str, dict[str, str]] = {
         "quizzes_subtitle": "Cuestionarios anclados en el contenido del curso. Tu progreso se guarda localmente.",
         "flashcards_subtitle": "Tarjetas derivadas del glosario y los cuestionarios. Marca lo que ya sabes.",
         "podcast_subtitle": "Guion listo para TTS. El reproductor aparece automáticamente cuando hay audio.",
+        "hero_modules_html": "{n} <em>lecciones</em>",
+        "hero_glossary_html": "<em>Un</em> índice<em class=\"text-[var(--accent)]\">.</em>",
+        "hero_quizzes_html": "<em>Comprueba</em> tu comprensión<em class=\"text-[var(--accent)]\">.</em>",
+        "hero_flashcards_html": "<em>Recordar</em>, repetir<em class=\"text-[var(--accent)]\">.</em>",
+        "hero_notebook_html": "<em>Tus</em> explicaciones<em class=\"text-[var(--accent)]\">.</em>",
+        "hero_podcast_html": "<em>El</em> compañero de audio<em class=\"text-[var(--accent)]\">.</em>",
         "footer_built": "Construido por", "not_available": "Contenido no disponible.",
         "progress_hint": "Tu progreso se guarda en este navegador (localStorage).",
         "self_explain_label": "Autoexplicación",
@@ -345,6 +363,12 @@ CHROME_STRINGS: dict[str, dict[str, str]] = {
         "quizzes_subtitle": "Quiz ancrés dans le contenu du cours. Votre progression est sauvegardée localement.",
         "flashcards_subtitle": "Cartes dérivées du glossaire et des quiz. Marquez ce que vous savez.",
         "podcast_subtitle": "Script prêt pour la TTS. Le lecteur apparaît automatiquement si l'audio existe.",
+        "hero_modules_html": "{n} <em>leçons</em>",
+        "hero_glossary_html": "<em>Un</em> index<em class=\"text-[var(--accent)]\">.</em>",
+        "hero_quizzes_html": "<em>Vérifiez</em> votre compréhension<em class=\"text-[var(--accent)]\">.</em>",
+        "hero_flashcards_html": "<em>Rappeler</em>, répéter<em class=\"text-[var(--accent)]\">.</em>",
+        "hero_notebook_html": "<em>Vos</em> explications<em class=\"text-[var(--accent)]\">.</em>",
+        "hero_podcast_html": "<em>Le</em> compagnon audio<em class=\"text-[var(--accent)]\">.</em>",
         "footer_built": "Construit par", "not_available": "Contenu indisponible.",
         "progress_hint": "Votre progression est sauvegardée dans ce navigateur (localStorage).",
         "self_explain_label": "Explication personnelle",
@@ -405,6 +429,12 @@ CHROME_STRINGS: dict[str, dict[str, str]] = {
         "quizzes_subtitle": "コース内容に基づくクイズ。進捗はローカルに保存されます。",
         "flashcards_subtitle": "用語集とクイズから生成されたカード。覚えたものをマークしましょう。",
         "podcast_subtitle": "TTS 用の台本。音声ファイルがあると自動でプレーヤーが表示されます。",
+        "hero_modules_html": "<em>{n}</em> レッスン",
+        "hero_glossary_html": "<em>索引</em><em class=\"text-[var(--accent)]\">.</em>",
+        "hero_quizzes_html": "<em>理解</em>を確認<em class=\"text-[var(--accent)]\">.</em>",
+        "hero_flashcards_html": "<em>思い出す</em>、繰り返す<em class=\"text-[var(--accent)]\">.</em>",
+        "hero_notebook_html": "<em>あなたの</em>説明<em class=\"text-[var(--accent)]\">.</em>",
+        "hero_podcast_html": "<em>音声</em>コンパニオン<em class=\"text-[var(--accent)]\">.</em>",
         "footer_built": "作成", "not_available": "利用できません。",
         "progress_hint": "進捗はこのブラウザ (localStorage) に保存されます。",
         "self_explain_label": "自己説明",
@@ -843,7 +873,13 @@ def build_course_data(content_dir: Path, owner_name: str) -> dict[str, Any]:
     flashcards = derive_flashcards(glossary, quizzes)
     audio_file = discover_audio(podcast_dir, owner_name)
 
-    title_display = parse_first_h1(overview_raw) or owner_name
+    title_display = parse_first_h1(overview_raw)
+    if not title_display:
+        if repo_url:
+            m = re.match(r"https?://github\.com/([^/]+)/([^/]+?)(?:\.git)?/?$", repo_url)
+            title_display = f"{m.group(1)} / {m.group(2)}" if m else owner_name
+        else:
+            title_display = owner_name
 
     return {
         "schema_version": 1,
