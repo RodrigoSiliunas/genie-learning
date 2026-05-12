@@ -561,26 +561,34 @@
             </div>
           </div>
 
-          <div class="max-w-[680px] mx-auto mt-7 flex flex-wrap items-center justify-between gap-4">
-            <button class="btn btn-ghost" @click="prevFlash" :disabled="visibleFlashcards.length < 2">
+          <div class="max-w-[680px] mx-auto mt-7 flash-nav">
+            <button class="btn btn-ghost flash-nav-side" @click="prevFlash" :disabled="visibleFlashcards.length < 2">
               <svg class="icon" width="14" height="14" viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
               {{ t('previous') }}
             </button>
-            <div class="flex gap-2">
-              <button class="btn btn-ghost" style="border-color:var(--wrong);color:var(--wrong)" @click="rateFlash('again')" :title="'1'">
-                {{ t('again') }}<span class="font-mono text-[10px] opacity-60 ml-1">(10m)</span>
+            <div class="flash-rate-group" role="group" aria-label="Rate this card">
+              <button class="flash-rate flash-rate--again" @click="rateFlash('again')" :title="'1'">
+                <span class="flash-rate-dot" aria-hidden="true"></span>
+                <span>{{ t('again') }}</span>
+                <span class="flash-rate-int">10m</span>
               </button>
-              <button class="btn btn-ghost" style="border-color:var(--muted);color:var(--muted)" @click="rateFlash('hard')" :title="'2'">
-                {{ t('hard') }}<span class="font-mono text-[10px] opacity-60 ml-1">({{ previewInterval('hard', scheduleFor(currentFlash)) === DAY_MS ? '1d' : Math.round(previewInterval('hard', scheduleFor(currentFlash))/DAY_MS)+'d' }})</span>
+              <button class="flash-rate flash-rate--hard" @click="rateFlash('hard')" :title="'2'">
+                <span class="flash-rate-dot" aria-hidden="true"></span>
+                <span>{{ t('hard') }}</span>
+                <span class="flash-rate-int">{{ previewInterval('hard', scheduleFor(currentFlash)) === DAY_MS ? '1d' : Math.round(previewInterval('hard', scheduleFor(currentFlash))/DAY_MS)+'d' }}</span>
               </button>
-              <button class="btn" @click="rateFlash('good')" :title="'3'">
-                {{ t('good') }}<span class="font-mono text-[10px] opacity-60 ml-1">({{ previewInterval('good', scheduleFor(currentFlash)) === DAY_MS ? '1d' : previewInterval('good', scheduleFor(currentFlash)) === 3*DAY_MS ? '3d' : Math.round(previewInterval('good', scheduleFor(currentFlash))/DAY_MS)+'d' }})</span>
+              <button class="flash-rate flash-rate--good" @click="rateFlash('good')" :title="'3'">
+                <span class="flash-rate-dot" aria-hidden="true"></span>
+                <span>{{ t('good') }}</span>
+                <span class="flash-rate-int">{{ previewInterval('good', scheduleFor(currentFlash)) === DAY_MS ? '1d' : previewInterval('good', scheduleFor(currentFlash)) === 3*DAY_MS ? '3d' : Math.round(previewInterval('good', scheduleFor(currentFlash))/DAY_MS)+'d' }}</span>
               </button>
-              <button class="btn btn-accent" @click="rateFlash('easy')" :title="'4'">
-                {{ t('easy') }}<span class="font-mono text-[10px] opacity-60 ml-1">({{ previewInterval('easy', scheduleFor(currentFlash)) === 4*DAY_MS ? '4d' : Math.round(previewInterval('easy', scheduleFor(currentFlash))/DAY_MS)+'d' }})</span>
+              <button class="flash-rate flash-rate--easy" @click="rateFlash('easy')" :title="'4'">
+                <span class="flash-rate-dot" aria-hidden="true"></span>
+                <span>{{ t('easy') }}</span>
+                <span class="flash-rate-int">{{ previewInterval('easy', scheduleFor(currentFlash)) === 4*DAY_MS ? '4d' : Math.round(previewInterval('easy', scheduleFor(currentFlash))/DAY_MS)+'d' }}</span>
               </button>
             </div>
-            <button class="btn btn-ghost" @click="nextFlash" :disabled="visibleFlashcards.length < 2">
+            <button class="btn btn-ghost flash-nav-side" @click="nextFlash" :disabled="visibleFlashcards.length < 2">
               {{ t('next') }}
               <svg class="icon" width="14" height="14" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
             </button>
@@ -709,6 +717,7 @@
 /* Boot — payload injected by scripts/render_course.py as base64. App logic lives in assets/app.js. */
 window.__COURSE_DATA = JSON.parse(new TextDecoder('utf-8').decode(Uint8Array.from(atob("/* GENIE_DATA */"), c => c.charCodeAt(0))));
 window.__GRADER_KEY = "/* GENIE_GRADER_KEY */";
+window.__GRADER_CONTEXT = JSON.parse(new TextDecoder('utf-8').decode(Uint8Array.from(atob("/* GENIE_GRADER_CTX */"), c => c.charCodeAt(0))));
 </script>
 <script src="assets/app.js?v=__GENIE_ASSET_VERSION__"></script>
 </body>

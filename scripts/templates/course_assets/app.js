@@ -106,7 +106,7 @@ const app = createApp({
     /* ---------- Grading (AI short-answer evaluation) ---------- */
     const grading = ref(persisted.grading || {});             // { 'quizId:qi': HTML string }
     const gradingLoading = ref({});
-    const graderContext = ref(null);
+    const graderContext = ref(window.__GRADER_CONTEXT || null);
 
     /* ---------- i18n ---------- */
     const t = (key) => (data.value.chrome && data.value.chrome[key]) || key;
@@ -717,11 +717,6 @@ Avalie:`;
 
     onMounted(() => {
       applyTweaks();
-      // Load grader context (RAG index for short-answer AI evaluation)
-      fetch('assets/grader_context.json')
-        .then(r => r.json())
-        .then(ctx => { graderContext.value = ctx; })
-        .catch(() => {});
       // keyboard: left/right for flashcards & modules
       window.addEventListener('keydown', (e) => {
         if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
