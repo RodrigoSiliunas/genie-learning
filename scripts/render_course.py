@@ -134,6 +134,11 @@ CHROME_STRINGS: dict[str, dict[str, str]] = {
         "notebook_empty": "Você ainda não escreveu nenhuma explicação. Comece em qualquer módulo.",
         "last_edited": "Última edição",
         "edit": "Editar",
+        "pretest_label": "Pretest",
+        "pretest_hint": "Tente responder antes de ler. Errar também ajuda a aprender.",
+        "pretest_placeholder": "Sua hipótese...",
+        "pretest_your_attempt": "Sua tentativa",
+        "pretest_reveal": "Revelar lição",
     },
     "en": {
         "overview": "Overview",
@@ -223,6 +228,11 @@ CHROME_STRINGS: dict[str, dict[str, str]] = {
         "notebook_empty": "You haven't written any explanations yet. Start in any module.",
         "last_edited": "Last edited",
         "edit": "Edit",
+        "pretest_label": "Pretest",
+        "pretest_hint": "Try answering before reading. Wrong guesses still help learning.",
+        "pretest_placeholder": "Your hypothesis...",
+        "pretest_your_attempt": "Your attempt",
+        "pretest_reveal": "Reveal lesson",
     },
     "es": {
         "overview": "Visión general", "tutorial": "Tutorial", "modules": "Módulos",
@@ -275,6 +285,11 @@ CHROME_STRINGS: dict[str, dict[str, str]] = {
         "notebook_empty": "Aún no has escrito explicaciones. Empieza en cualquier módulo.",
         "last_edited": "Última edición",
         "edit": "Editar",
+        "pretest_label": "Pretest",
+        "pretest_hint": "Intenta responder antes de leer. Equivocarse también ayuda.",
+        "pretest_placeholder": "Tu hipótesis...",
+        "pretest_your_attempt": "Tu intento",
+        "pretest_reveal": "Mostrar lección",
     },
     "fr": {
         "overview": "Vue d'ensemble", "tutorial": "Tutoriel", "modules": "Modules",
@@ -327,6 +342,11 @@ CHROME_STRINGS: dict[str, dict[str, str]] = {
         "notebook_empty": "Vous n'avez encore écrit aucune explication. Commencez par n'importe quel module.",
         "last_edited": "Dernière modification",
         "edit": "Modifier",
+        "pretest_label": "Pretest",
+        "pretest_hint": "Essayez de répondre avant de lire. Se tromper aide aussi à apprendre.",
+        "pretest_placeholder": "Votre hypothèse...",
+        "pretest_your_attempt": "Votre tentative",
+        "pretest_reveal": "Révéler la leçon",
     },
     "ja": {
         "overview": "概要", "tutorial": "チュートリアル", "modules": "モジュール",
@@ -379,6 +399,11 @@ CHROME_STRINGS: dict[str, dict[str, str]] = {
         "notebook_empty": "まだ説明を書いていません。任意のモジュールから始めてください。",
         "last_edited": "最終編集",
         "edit": "編集",
+        "pretest_label": "事前テスト",
+        "pretest_hint": "読む前に答えてみてください。間違えても学習に役立ちます。",
+        "pretest_placeholder": "あなたの推測...",
+        "pretest_your_attempt": "あなたの回答",
+        "pretest_reveal": "レッスンを表示",
     },
 }
 
@@ -394,6 +419,8 @@ ANSWERS_HEADING_RE = re.compile(r"^##\s+(?:Gabarito|Answer key|Respuestas|Répon
 NUMBERED_ITEM_RE = re.compile(r"^(\d+)\.\s+", re.MULTILINE)
 MC_OPTION_RE = re.compile(r"^\s*-\s+([A-Z])\.\s+(.+)$")
 H1_RE = re.compile(r"^#\s+(.+)$", re.MULTILINE)
+PRETEST_BLOCK_RE = re.compile(r'^##\s+Pretest\s*\n(.*?)\n---\s*\n', re.MULTILINE | re.DOTALL)
+PRETEST_QUESTION_RE = re.compile(r'^\s*(\d+)\.\s+(.+?)(?=\n\s*\d+\.|\n---|\Z)', re.MULTILINE | re.DOTALL)
 GLOSSARY_LETTER_RE = re.compile(r"^##\s+(\S+?)\s*$", re.MULTILINE)
 GLOSSARY_TERM_RE = re.compile(r"^###\s+\*\*(.+?)\*\*\s*$", re.MULTILINE)
 # Two formats to handle for MC answer keys:
@@ -695,6 +722,19 @@ def build_grader_context(
     return ctx
 
 
+def extract_pretest(raw: str) -> tuple[dict | None, str]:
+    """Returns ({questions: [...]} or None, raw_without_pretest_block)."""
+    m = PRETEST_BLOCK_RE.search(raw)
+    if not m:
+        return None, raw
+    inner = m.group(1)
+    questions = [q.group(2).strip() for q in PRETEST_QUESTION_RE.finditer(inner)]
+    if not questions or len(questions) > 2:
+        return None, raw
+    stripped = raw[:m.start()] + raw[m.end():]
+    return {"questions": questions}, stripped
+
+
 def discover_modules(content_dir: Path, inventory_modules: list[dict[str, Any]] | None) -> list[dict[str, Any]]:
     """Scan `30-modules/` and merge metadata from the cartographer inventory if available."""
     modules_dir = content_dir / "30-modules"
@@ -714,12 +754,14 @@ def discover_modules(content_dir: Path, inventory_modules: list[dict[str, Any]] 
         slug = m.group(2) if m else stem
         title = parse_first_h1(raw) or slug
         purpose = inv_by_name.get(slug, {}).get("purpose", "") if inv_by_name else ""
+        pretest, raw_stripped = extract_pretest(strip_first_h1(raw))
         modules.append({
             "slug": stem,
             "name": slug,
             "title_display": title,
             "purpose": purpose,
-            "raw": strip_first_h1(raw),
+            "raw": raw_stripped,
+            "pretest": pretest,
         })
     return modules
 
