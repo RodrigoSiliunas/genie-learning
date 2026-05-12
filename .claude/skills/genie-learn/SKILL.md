@@ -48,7 +48,11 @@ For the first primary-content dispatch, use explicit subagent invocations in one
 2. **One** `jargon-extractor` invocation with: `repo_path`, `stack_language = stack.language`, `language`, `output_path = content_path/20-glossary.md`.
 3. **Up to `module_workers` `module-teacher` invocations** when `max_workers >= 3`. Each gets a distinct module from the inventory. Output paths follow the pattern `content_path/30-modules/NN-<module-slug>.md` where `NN` is a 2-digit zero-padded index (`01`, `02`, ...).
 
-Each `module-teacher` prompt should include: `repo_path`, `module_name`, `module_path`, `module_purpose`, `stack_language`, `language`, and `output_path`.
+Each `module-teacher` prompt MUST include: `repo_path`, `module_name`, `module_path`, `module_purpose`, `stack_language`, `language`, `output_path`, **and the Pretest reminder block below verbatim**.
+
+> **PRETEST REQUIRED** — Emit a `## Pretest` section at the VERY TOP of the file (before any other prose, even the `## Purpose` heading) with 1-2 predictive questions anchored on something visible BEFORE reading (file path, function name, signature), followed by a blank line and `---` separator. Use the prefix line in the course's target language per your base instructions. **Skip ONLY if one of these three exceptions holds**: (1) the module body is a pure-reference flat list or single table with no prose; (2) the module name is an opaque acronym AND nothing externally-visible (filename, signature, path) can anchor a guess; (3) `module_purpose` is empty or a single word. Otherwise emit. This is not optional.
+
+This reminder is load-bearing: empirically, the agent's base instructions alone produce ~0% Pretest compliance without this reinforcement in the dispatch prompt. Do not omit it, abbreviate it, or paraphrase it — copy verbatim.
 
 **If `len(modules) > module_workers`**: process modules in batches. After the first batch returns, dispatch the next batch (still in single messages with multiple tool calls per batch when `module_workers > 1`). Keep `tutorial-writer` and `jargon-extractor` only in the first batch. Never skip module generation solely because `max_workers - 2` is zero.
 
